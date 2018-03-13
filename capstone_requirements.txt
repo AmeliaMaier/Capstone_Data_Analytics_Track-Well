@@ -1,0 +1,21 @@
+Part 1: Analytics
+	required:
+		data cleaning 				- in progress
+		exploratory data analysis 	- in progress
+		feature engineering 		- in progress
+		predictive linear model
+		results
+		interpretation of results
+	might have:
+		data acquisition 			- done
+	schedual:
+		Monday 		- dataset selection 	- done
+					- dataset exploration	- in progress
+		Tuesday 	- central question(s)	- done
+					- EDA & Visualization
+		Wednesday 	- Hypothesis Testing
+				  	- Moodels
+		Thursday	- finalize models
+					- presentations & code review
+		Friday		- presentations
+			 

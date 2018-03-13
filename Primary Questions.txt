@@ -1,0 +1,7 @@
+Capstone
+	Questions answering (by importance):
+		1) How should I monetize this platform? Primary options: sell data or sell access
+			1A) Is there value too the data users are putting into the website?
+				1AA) Is there a group of users that give good data? 
+				1AB) Is there a group of users that give more data?
+				1AC) Are users or user groups trustworthy?
