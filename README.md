@@ -50,3 +50,5 @@ There appears to have been a manual data load into the database at somepoint as 
   * This was determined with a very forgiving normal distribution based on the average of the mean heights for men and women and adding together the standard distribution for the two groups. It is not meant to predict if they were accurate but to simply show where heights provided weren't feasible (40 cm for example).
   
 Because these features are based on existing features, there are likely to be highly correlated sets in the full feature map. I intend to pick only some of the features, avoiding correlated groups, for the final models.
+
+Correlation Heatmap: ![Alt](images/profile_corr_map.png) 
