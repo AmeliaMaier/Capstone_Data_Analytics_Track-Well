@@ -68,22 +68,30 @@ Signups By Month: ![Signups By Month](images/EDA_Signups_Per_Month-after_start_f
 ## Hypothesis Test
 __Question:__ Is there a statistical difference in activity level, days active, and/or amount of data provided by users that signed up due to a large push from a fitness blogger?
 
-__H<sub>0</sub>:__ There is no difference in involvment metrics for Dec when compared to the rest of the year.
-__H<sub>1</sub>:__ There is a difference in involment metrics for Dec when compared to the rest of the year.
-__alpha:__ .025 = (.05/2)
+>>>__H<sub>0</sub>:__ There is no difference in involvment metrics for Dec when compared to the rest of the year.
+
+>>>__H<sub>1</sub>:__ There is a difference in involment metrics for Dec when compared to the rest of the year.
+
+>>>__alpha:__ .025 = (.05/2)
 
 I used a two population t-test for each metric to determine if there was a statistical differance. Due to the time sequence effect on Days Active and Days Inactive, I decided not to include them in the testinng as a difference between Dec and the rest of the year could simply be due to people signing up in Dec having less time to be active or inactive on the service.
 
 Running ttest on User Activity Scores for Dec vs all other months
-Dec Average: 0.8813206096033261
-Year Average without Dec: 2.769237275134839
-Ttest_indResult(statistic=-14.595829266547389, pvalue=1.391951976598514e-46)
+
+>>>Dec Average: 0.8813206096033261
+
+>>>Year Average without Dec: 2.769237275134839
+
+>>>Ttest_indResult(statistic=-14.595829266547389, pvalue=1.391951976598514e-46)
 
 
 Running ttest on Users Active YN for Dec vs all other months
-Dec Average: 0.30687830687830686
-Year Average without Dec: 0.5045742434904996
-Ttest_indResult(statistic=-11.124419257482321, pvalue=3.613288170575678e-28)
+
+>>>Dec Average: 0.30687830687830686
+
+>>>Year Average without Dec: 0.5045742434904996
+
+>>>Ttest_indResult(statistic=-11.124419257482321, pvalue=3.613288170575678e-28)
 
 __Conclusion:__ In metrics that have been normalized for total time on the system, there does appear to be a statisticaly significant difference in users who signed up in December and all other users. Unfortunantly for Trackwell, this segment of their users appear to be less likely to be active at all on the site and, if they are active, to provide less data per day than other users. 
 
