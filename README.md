@@ -109,13 +109,16 @@ __Question:__ Is there a statistical difference in activity level for users that
 I used a two population t-test for each metric to determine if there was a statistical differance. Due to the time sequence effect on Days Active and Days Inactive, I decided not to include them in the testinng as a difference between Dec and the rest of the year could simply be due to people signing up in Dec having less time to be active or inactive on the service.
 
 __TTest Assumptions:__ 
-  *Independent observations: Each record is a seperate and unique account. No account can have two creation months.
-  *Homogeneity: The standard deviations are very close for the YN populations but are slightly different for the Score populations. For the time being, I am going forwards assuming they are close enought, but it does make results for this comparison somewhat more questionable.
-  *Normality: bootstrapped sample means for each population in each test
+  * Independent observations: Each record is a seperate and unique account. No account can have two creation months.
+  * Homogeneity: The standard deviations are very close for the YN populations but are slightly different for the Score populations. For the time being, I am going forwards assuming they are close enought, but it does make results for this comparison somewhat more questionable.
+  * Normality: bootstrapped sample means for each population in each test
   ![](images/Bootstrapped_Dec_avg_ActiveYN.png)
   ![](images/Bootstrapped_Dec_avg_Activity_score.png)
   ![](images/Bootstrapped_Other_avg_ActiveYN.png)
   ![](images/Bootstrapped_Other_avg_Activity_score.png)
+  
+  ![](images/Dec-vs-other_Active.png)
+  ![](images/Dec-vs-other_ActiveScore.png)
 
 Running ttest on User Activity Scores for Dec vs all other months
 
