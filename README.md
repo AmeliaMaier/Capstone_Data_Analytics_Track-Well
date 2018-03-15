@@ -355,3 +355,40 @@ avg / total       0.82      0.78      0.78       880
 The results from a basic logistic regression surprised me. The model is consistently YES bias when the data is actually NO bias.
 
 ![](images/Active_YN.png)
+
+I then tried with a balanced class weight in the logistic model, but it didn't make very much differance. 
+```
+Mean accuracy of logistic regression classifier on test set: 0.7784090909090909
+[[357 163]
+ [ 32 328]]
+tn, fp
+fn, tp
+
+
+
+    estimatedCoefficients               features      sort
+0                1.400781   dup_protocol_started  1.400781
+5                0.350908       bio_sex_answered  0.350908
+3                0.275247     usual_activity_len  0.275247
+1                0.218432            caffeine_yn  0.218432
+7                0.153701        menstruation_yn  0.153701
+8                0.117778    blood_type_answered  0.117778
+2                0.112738             married_yn  0.112738
+11               0.112275   usual_conditions_len  0.112275
+9                0.094277         usual_diet_len  0.094277
+10               0.049746  usual_medications_len  0.049746
+4                0.038385             alcohol_yn  0.038385
+6                0.030113                bio_sex  0.030113
+Estimated intercept: [-0.38602606]
+With KFold cross validation
+10-fold cross validation average accuracy: 0.7968553161259767
+10-fold cross validation average recall: 0.8910320505409649
+10-fold cross validation average precision: 0.6889490663275973
+             precision    recall  f1-score   support
+
+          0       0.92      0.69      0.79       520
+          1       0.67      0.91      0.77       360
+
+avg / total       0.82      0.78      0.78       880
+```
+![](images/ROC_balanced.png)
