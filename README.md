@@ -53,6 +53,19 @@ Because these features are based on existing features, there are likely to be hi
 
 Correlation Heatmap: ![Alt](images/profile_corr_map.png) 
 
+I later came back to check correlations specifically in the features suggested by my lasso regression models:
+
+Correlations For User Active YN: ![](images/correlations_user_active_yn.png)
+
+Correlations For User Active Score: ![](images/correlations_user_active_score.png)
+
+Correlations For User Active Count: ![](images/correlations_user_active_cnt.png)
+
+Correlations For Days Active: ![](images/correlations_days_active.png)
+
+Correlations For Days Inactive: ![](images/correlations_days_inactive.png)
+
+
 After going back and fixing for the dataload, the timebased correlations became more obviouse:
 
 Total Number of Days Active By Signup Month: ![Total Number of Days Active By Signup Month](images/monthly_days_active.png) 
@@ -95,3 +108,141 @@ Running ttest on Users Active YN for Dec vs all other months
 
 __Conclusion:__ In metrics that have been normalized for total time on the system, there does appear to be a statisticaly significant difference in users who signed up in December and all other users. Unfortunantly for Trackwell, this segment of their users appear to be less likely to be active at all on the site and, if they are active, to provide less data per day than other users. 
 
+## Logistic and Linear Regression
+### Lasso to Pick Features
+
+User Active YN Coefficients: ![User Active YN Coefficients](images/lasso_user_active_yn.png)
+```python
+coefficients             predictors      sort
+3       0.199714   dup_protocol_started  0.199714
+8       0.037674            caffeine_yn  0.037674
+5       0.031455  dup_protocol_finished  0.031455
+7       0.029471             married_yn  0.029471
+13      0.027493     usual_activity_len  0.027493
+6       0.019620             alcohol_yn  0.019620
+20      0.016918       bio_sex_answered  0.016918
+9       0.011760        menstruation_yn  0.011760
+19      0.008540    blood_type_answered  0.008540
+12      0.008184         usual_diet_len  0.008184
+11      0.006984  usual_medications_len  0.006984
+10      0.003065   usual_conditions_len  0.003065
+16      0.000000       married_answered  0.000000
+21      0.000000  menstruation_answered  0.000000
+18      0.000000      pregnant_answered  0.000000
+17      0.000000      caffeine_answered  0.000000
+0       0.000000            pregnant_yn  0.000000
+15      0.000000       alcohol_answered  0.000000
+14      0.000000         smoke_answered  0.000000
+1       0.000000                bio_sex  0.000000
+4       0.000000               smoke_yn  0.000000
+2       0.000000    dup_protocol_active  0.000000
+22      0.000000      height_likelihood  0.000000
+```
+User Activity Score Coefficients: ![User Activity Score Coefficients](images/lasso_user_activity_score.png)
+```python
+    coefficients             predictors      sort
+3       0.434011   dup_protocol_started  0.434011
+13      0.421182     usual_activity_len  0.421182
+5      -0.245248  dup_protocol_finished  0.245248
+6       0.203033             alcohol_yn  0.203033
+1      -0.191818                bio_sex  0.191818
+4       0.146544               smoke_yn  0.146544
+9       0.140283        menstruation_yn  0.140283
+8       0.121382            caffeine_yn  0.121382
+11      0.103242  usual_medications_len  0.103242
+0       0.032777            pregnant_yn  0.032777
+10      0.000000   usual_conditions_len  0.000000
+7       0.000000             married_yn  0.000000
+12      0.000000         usual_diet_len  0.000000
+2       0.000000    dup_protocol_active  0.000000
+14      0.000000         smoke_answered  0.000000
+15      0.000000       alcohol_answered  0.000000
+16      0.000000       married_answered  0.000000
+17      0.000000      caffeine_answered  0.000000
+18      0.000000      pregnant_answered  0.000000
+19      0.000000    blood_type_answered  0.000000
+20      0.000000       bio_sex_answered  0.000000
+21      0.000000  menstruation_answered  0.000000
+22      0.000000      height_likelihood  0.000000
+```
+User Activity Count Coefficients: ![User Activity Count Coefficients](images/lasso_user_activity_count.png)
+```python
+    coefficients             predictors       sort
+13     35.409223     usual_activity_len  35.409223
+18    -17.519923      pregnant_answered  17.519923
+8      17.065931            caffeine_yn  17.065931
+12     13.678984         usual_diet_len  13.678984
+14    -11.344958         smoke_answered  11.344958
+0       8.460380            pregnant_yn   8.460380
+3       6.816043   dup_protocol_started   6.816043
+11      5.861865  usual_medications_len   5.861865
+10      5.292121   usual_conditions_len   5.292121
+6       2.476444             alcohol_yn   2.476444
+7       0.000000             married_yn   0.000000
+9       0.000000        menstruation_yn   0.000000
+1       0.000000                bio_sex   0.000000
+5       0.000000  dup_protocol_finished   0.000000
+4       0.000000               smoke_yn   0.000000
+15      0.000000       alcohol_answered   0.000000
+16      0.000000       married_answered   0.000000
+17      0.000000      caffeine_answered   0.000000
+2       0.000000    dup_protocol_active   0.000000
+19      0.000000    blood_type_answered   0.000000
+20      0.000000       bio_sex_answered   0.000000
+21      0.000000  menstruation_answered   0.000000
+22      0.000000      height_likelihood   0.000000
+```
+User Days Actiive Coefficients: ![User Days Active Coefficients](images/lasso_days_active.png)
+```python
+    coefficients             predictors      sort
+18     -7.939721      pregnant_answered  7.939721
+8       4.175520            caffeine_yn  4.175520
+15     -4.164881       alcohol_answered  4.164881
+16      3.820201       married_answered  3.820201
+21     -3.396733  menstruation_answered  3.396733
+12      3.377943         usual_diet_len  3.377943
+17      2.885086      caffeine_answered  2.885086
+13      2.756762     usual_activity_len  2.756762
+19     -2.514606    blood_type_answered  2.514606
+7       1.986782             married_yn  1.986782
+3       1.754221   dup_protocol_started  1.754221
+2       1.399556    dup_protocol_active  1.399556
+5       1.265259  dup_protocol_finished  1.265259
+11      1.262112  usual_medications_len  1.262112
+4       1.176299               smoke_yn  1.176299
+0       0.432050            pregnant_yn  0.432050
+20      0.397348       bio_sex_answered  0.397348
+10      0.128824   usual_conditions_len  0.128824
+14      0.000000         smoke_answered  0.000000
+1       0.000000                bio_sex  0.000000
+9       0.000000        menstruation_yn  0.000000
+6       0.000000             alcohol_yn  0.000000
+22      0.000000      height_likelihood  0.000000
+```
+User Days Inactive Coefficients: ![User Days Inactive Coefficients](images/lasso_days_inactive.png)
+```python
+    coefficients             predictors       sort
+22     16.926637      height_likelihood  16.926637
+19    -16.544399    blood_type_answered  16.544399
+8       7.583835            caffeine_yn   7.583835
+3       6.295368   dup_protocol_started   6.295368
+0       5.470116            pregnant_yn   5.470116
+4       5.255658               smoke_yn   5.255658
+2      -4.857834    dup_protocol_active   4.857834
+14     -3.655486         smoke_answered   3.655486
+9       3.530928        menstruation_yn   3.530928
+5      -2.756194  dup_protocol_finished   2.756194
+20      2.196281       bio_sex_answered   2.196281
+7       1.882430             married_yn   1.882430
+1      -1.565740                bio_sex   1.565740
+13      1.498393     usual_activity_len   1.498393
+18     -1.481262      pregnant_answered   1.481262
+16     -1.330033       married_answered   1.330033
+17     -1.097371      caffeine_answered   1.097371
+6       0.645090             alcohol_yn   0.645090
+11     -0.050747  usual_medications_len   0.050747
+12     -0.039863         usual_diet_len   0.039863
+10      0.000000   usual_conditions_len   0.000000
+15      0.000000       alcohol_answered   0.000000
+21      0.000000  menstruation_answered   0.000000
+```
