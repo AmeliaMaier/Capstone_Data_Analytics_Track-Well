@@ -68,7 +68,7 @@ Features that will probably be useful in the future but haven't been created yet
 - Number of protocols completed
 - Likelihood of inputs for the entries (similar to likelihood of height) would need to be written on a per entry-type basis to determine if someone's data in a given protocol can be used towards completing that protocol's hypothesis test.
   
-Because these features are based on existing features, there are likely to be highly correlated sets in the full feature map. I intend to pick only some of the features, avoiding correlated groups, for the final models.
+Because these features are based on existing features, there are likely to be highly correlated sets in the full feature map. I intend to pick only some of the features, avoiding correlated groups, for the final models. For most of my analysis, I was looking at 2933 unique users with about 30 features.
 
 Correlation Heatmap: ![Alt](images/profile_corr_map.png) 
 
@@ -98,7 +98,7 @@ Activity Score By Signup Month: ![Activity Score By Signup Month](images/monthly
 Signups By Month: ![Signups By Month](images/EDA_Signups_Per_Month-after_start_fix.png)
 
 ## Hypothesis Test
-__Question:__ Is there a statistical difference in activity level, days active, and/or amount of data provided by users that signed up due to a large push from a fitness blogger?
+__Question:__ Is there a statistical difference in activity level for users that signed up due to a large push from a fitness blogger when compared with everyone else?
 
 >>>__H<sub>0</sub>:__ There is no difference in involvment metrics for Dec when compared to the rest of the year.
 
@@ -107,6 +107,15 @@ __Question:__ Is there a statistical difference in activity level, days active, 
 >>>__alpha:__ .025 = (.05/2)
 
 I used a two population t-test for each metric to determine if there was a statistical differance. Due to the time sequence effect on Days Active and Days Inactive, I decided not to include them in the testinng as a difference between Dec and the rest of the year could simply be due to people signing up in Dec having less time to be active or inactive on the service.
+
+__TTest Assumptions:__ 
+  *Independent observations: Each record is a seperate and unique account. No account can have two creation months.
+  *Homogeneity: The standard deviations are very close for the YN populations but are slightly different for the Score populations. For the time being, I am going forwards assuming they are close enought, but it does make results for this comparison somewhat more questionable.
+  *Normality: bootstrapped sample means for each population in each test
+  ![](images/Bootstrapped_Dec_avg_ActiveYN.png)
+  ![](images/Bootstrapped_Dec_avg_Activity_score.png)
+  ![](images/Bootstrapped_Other_avg_ActiveYN.png)
+  ![](images/Bootstrapped_Other_avg_Activity_score.png)
 
 Running ttest on User Activity Scores for Dec vs all other months
 
