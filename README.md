@@ -246,3 +246,88 @@ User Days Inactive Coefficients: ![User Days Inactive Coefficients](images/lasso
 15      0.000000       alcohol_answered   0.000000
 21      0.000000  menstruation_answered   0.000000
 ```
+## Logistic Regression on User Active YN
+I started by feeding the predictors selected by Lasso directly in a Logistic model and seeing how it did:
+```python
+                Optimization terminated successfully.
+                 Current function value: 0.526785
+                 Iterations 6
+                                   Logit Regression Results
+        ==============================================================================
+        Dep. Variable:         user_active_yn   No. Observations:                 2933
+        Model:                          Logit   Df Residuals:                     2921
+        Method:                           MLE   Df Model:                           11
+        Date:                Wed, 14 Mar 2018   Pseudo R-squ.:                  0.2185
+        Time:                        16:15:48   Log-Likelihood:                -1545.1
+        converged:                       True   LL-Null:                       -1977.1
+                                                LLR p-value:                3.387e-178
+        =========================================================================================
+                                    coef    std err          z      P>|z|      [0.025      0.975]
+        -----------------------------------------------------------------------------------------
+        dup_protocol_started      2.0052      0.109     18.390      0.000       1.792       2.219
+        caffeine_yn               0.5336      0.140      3.799      0.000       0.258       0.809
+        married_yn                0.3289      0.130      2.537      0.011       0.075       0.583
+        usual_activity_len        0.0076      0.002      3.052      0.002       0.003       0.012
+        alcohol_yn                0.1439      0.140      1.031      0.303      -0.130       0.417
+        bio_sex_answered         -2.1063      0.165    -12.738      0.000      -2.430      -1.782
+        bio_sex                  -0.0544      0.151     -0.360      0.719      -0.351       0.242
+        menstruation_yn           0.3793      0.198      1.915      0.055      -0.009       0.767
+        blood_type_answered       0.4903      0.201      2.434      0.015       0.096       0.885
+        usual_diet_len            0.0036      0.002      1.918      0.055   -7.82e-05       0.007
+        usual_medications_len     0.0105      0.005      2.104      0.035       0.001       0.020
+        usual_conditions_len     -0.0006      0.002     -0.241      0.809      -0.005       0.004
+        =========================================================================================
+
+        Accuracy of logistic regression classifier on test set: 0.7761363636363636
+
+        10-fold cross validation average accuracy: 0.7973431210040255
+        10-fold cross validation average recall: 0.8910320505409649
+        10-fold cross validation average precision: 0.6895829278788901
+
+                     precision    recall  f1-score   support
+                  0       0.89      0.70      0.79       520
+                  1       0.67      0.88      0.76       360
+        avg / total       0.80      0.78      0.78       880
+```
+![](images/ROC-1.png)
+
+I then standardized each feature and dropped the least significant ones again:
+```pthon
+        Optimization terminated successfully.
+             Current function value: 0.526996
+             Iterations 6
+                               Logit Regression Results
+    ==============================================================================
+    Dep. Variable:         user_active_yn   No. Observations:                 2933
+    Model:                          Logit   Df Residuals:                     2924
+    Method:                           MLE   Df Model:                            8
+    Date:                Wed, 14 Mar 2018   Pseudo R-squ.:                  0.2182
+    Time:                        16:28:52   Log-Likelihood:                -1545.7
+    converged:                       True   LL-Null:                       -1977.1
+                                            LLR p-value:                6.059e-181
+    =========================================================================================
+                                coef    std err          z      P>|z|      [0.025      0.975]
+    -----------------------------------------------------------------------------------------
+    dup_protocol_started      2.0102      0.109     18.451      0.000       1.797       2.224
+    caffeine_yn               0.5956      0.125      4.768      0.000       0.351       0.840
+    married_yn                0.3423      0.129      2.654      0.008       0.090       0.595
+    usual_activity_len        0.0077      0.002      3.134      0.002       0.003       0.012
+    bio_sex_answered         -2.1518      0.099    -21.661      0.000      -2.347      -1.957
+    menstruation_yn           0.4179      0.153      2.740      0.006       0.119       0.717
+    blood_type_answered       0.4939      0.201      2.456      0.014       0.100       0.888
+    usual_diet_len            0.0036      0.002      1.983      0.047    4.08e-05       0.007
+    usual_medications_len     0.0106      0.005      2.153      0.031       0.001       0.020
+    =========================================================================================
+
+    Accuracy of logistic regression classifier on test set: 0.7784090909090909
+
+    10-fold cross validation average accuracy: 0.7992967085010656
+    10-fold cross validation average recall: 0.9086556035571437
+    10-fold cross validation average precision: 0.6866515937577335
+
+                 precision    recall  f1-score   support
+              0       0.92      0.69      0.79       520
+              1       0.67      0.91      0.77       360
+    avg / total       0.82      0.78      0.78       880
+```
+![](images/ROC-2.png)
