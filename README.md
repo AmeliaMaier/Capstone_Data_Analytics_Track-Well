@@ -390,4 +390,4 @@ avg / total       0.82      0.78      0.78       880
 ```
 ![](images/Roc_balanced.png)
 
-![](image/Predicted_to_Actual.png)
+![](images/Predicted_to_Actual.png)
