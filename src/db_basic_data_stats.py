@@ -277,7 +277,7 @@ def linear_regression(df):
 
     '''
     '''
-                OLS Regression Results                            
+                OLS Regression Results
     ===============================================================================
     Dep. Variable:     user_activity_score   R-squared:                       0.030
     Model:                             OLS   Adj. R-squared:                  0.025
@@ -503,6 +503,26 @@ def dec_vs_other_months(hypothesis_df):
     #hypothesis_df['estimated_created_date'] = hypothesis_df['estimated_created_date'].astype('datetime64[ns]')
     hypothesis_df_Dec = hypothesis_df.loc[hypothesis_df['estimated_created_date'].dt.month == 12]
     hypothesis_df_not_Dec = hypothesis_df.loc[hypothesis_df['estimated_created_date'].dt.month < 12]
+
+    # plt.hist(hypothesis_df_Dec['user_activity_score'], color='cyan', label='Dec Active Scores')
+    # plt.hist(hypothesis_df_not_Dec['user_activity_score'],alpha=0.7, color='pink', label='Year Active Scores')
+    # plt.ylabel('number of users')
+    # plt.xlabel('count per variable')
+    # plt.legend()
+    # plt.show()
+    #
+    # plt.hist(hypothesis_df_Dec['user_active_yn'], color='cyan', label='Dec Active YN')
+    # plt.hist(hypothesis_df_not_Dec['user_active_yn'],alpha=0.7, color='pink', label='Year Active YN')
+    # plt.ylabel('number of users')
+    # plt.xlabel('count per variable')
+    # plt.legend()
+    # plt.show()
+
+    bootstrap_ci(hypothesis_df_Dec['user_activity_score'], 'Dec User Activity Score')
+    bootstrap_ci(hypothesis_df_not_Dec['user_activity_score'], 'Not Dec User Activity Score')
+    bootstrap_ci(hypothesis_df_Dec['user_active_yn'], 'Dec User Active YN')
+    bootstrap_ci(hypothesis_df_not_Dec['user_active_yn'], 'Not Dec User Active YN')
+
     #dec sample for H on user_active_score
     print("Running ttest on user_active score for Dec vs all other months")
     print(f"Dec Average: {hypothesis_df_Dec['user_activity_score'].mean()}")
@@ -521,26 +541,7 @@ def dec_vs_other_months(hypothesis_df):
     print(user_active_ttest)
     #Ttest_indResult(statistic=-12.497492110151295, pvalue=6.2818586376725302e-35)
 
-    print("Running ttest on user active cnt for Dec vs all other months")
-    print(f"Dec Average: {hypothesis_df_Dec['user_activity_cnt'].mean()}")
-    print(f'Other Average: {hypothesis_df_not_Dec["user_activity_cnt"].mean()}')
-    hypothesis_df_Dec_sample = hypothesis_df_Dec.sample(len(hypothesis_df_not_Dec.index))
-    user_active_ttest = stats.ttest_ind(hypothesis_df_Dec_sample['user_activity_cnt'], hypothesis_df_not_Dec['user_activity_cnt'])
-    print(user_active_ttest)
 
-    print("Running ttest on days active for Dec vs all other months")
-    print(f"Dec Average: {hypothesis_df_Dec['days_active'].mean()}")
-    print(f'Other Average: {hypothesis_df_not_Dec["days_active"].mean()}')
-    hypothesis_df_Dec_sample = hypothesis_df_Dec.sample(len(hypothesis_df_not_Dec.index))
-    user_active_ttest = stats.ttest_ind(hypothesis_df_Dec_sample['days_active'], hypothesis_df_not_Dec['days_active'])
-    print(user_active_ttest)
-
-    print("Running ttest on days inactive for Dec vs all other months")
-    print(f"Dec Average: {hypothesis_df_Dec['days_inactive'].mean()}")
-    print(f'Other Average: {hypothesis_df_not_Dec["days_inactive"].mean()}')
-    hypothesis_df_Dec_sample = hypothesis_df_Dec.sample(len(hypothesis_df_not_Dec.index))
-    user_active_ttest = stats.ttest_ind(hypothesis_df_Dec_sample['days_inactive'], hypothesis_df_not_Dec['days_inactive'])
-    print(user_active_ttest)
     '''
     Running ttest on user_active score for Dec vs all other months
     Dec Average: 0.8813206096033261
@@ -551,21 +552,6 @@ def dec_vs_other_months(hypothesis_df):
     Dec Average: 0.30687830687830686
     Other Average: 0.5045742434904996
     Ttest_indResult(statistic=-10.82884489661955, pvalue=8.3293441015901507e-27)
-
-    Running ttest on user active cnt for Dec vs all other months
-    Dec Average: 17.54695767195767
-    Other Average: 93.32441942294159
-    Ttest_indResult(statistic=-10.862858081659036, pvalue=5.8275389559096457e-27)
-
-    Running ttest on days active for Dec vs all other months
-    Dec Average: 6.080687830687831
-    Other Average: 17.697396199859256
-    Ttest_indResult(statistic=-11.480187638098281, pvalue=7.480145410208733e-30)
-
-    Running ttest on days inactive for Dec vs all other months
-    Dec Average: 67.11177248677248
-    Other Average: 67.11177248677248
-    Ttest_indResult(statistic=-12.628116463934809, pvalue=1.3143337815703121e-35)
 
     '''
 def lasso_fit_and_print(target_name, model, predictor, target, predvar_columns):
@@ -627,6 +613,40 @@ def add_months(user_profile_df):
         else:
             user_profile_df[f'month_created_{num}'] = [0]*len(user_profile_df.index)
     return user_profile_df
+
+def bootstrap(sample_array, resample=10000):
+    '''Implement a bootstrap function to randomly draw with replacement from a given sample. The function should take a sample as a numpy ndarray and the number of resamples as an integer (default: 10000). The function should return a list of numpy ndarray objects, each ndarray is one bootstrap sample.'''
+    samples = []
+    sample_array=sample_array.ravel()
+    for num in range(resample):
+        samples.append(np.random.choice(sample_array, len(sample_array)))
+    return samples
+
+def bootstrap_ci(sample,name, stat_function=np.mean, iterations=1000, ci=95):
+    '''Implement a bootstrap_ci function to calculate the confidence interval of any sample statistic (in this case the mean). The function should take a sample, a function that computes the sample statistic, the number of resamples (default: 10000), and the confidence interval (default :95%). The function should return the lower and upper bounds of the confidence interval and the bootstrap distribution of the test statistic.'''
+    sample_lst = bootstrap(sample, iterations)
+    results = []
+    for sample_set in sample_lst:
+        results.append(stat_function(sample_set))
+    results.sort()
+    results = np.array(results)
+
+    '''this does the same as the np.percentile under it'''
+    #results_cut = results[int((len(results)*((1-(ci/100))/2))):int(len(results)-(len(results)*((1-(ci/100))/2)))]
+    plot_histogram_with_normal(results, name)
+    return (np.percentile(results, q=[(100-ci)/2,100-(100-ci)/2]), np.mean(results))
+
+def plot_histogram_with_normal(data, name):
+    '''simplest form of a histogram'''
+    fig = plt.figure(figsize=(12,12))
+    ax = fig.add_subplot(111)
+    x_range = np.linspace(stats.norm.ppf(0.0001, data.mean(), data.std()),stats.norm.ppf(0.9999, data.mean(), data.std()), 100)
+    ax.hist(data, normed=True)
+    normal = stats.norm.pdf(x_range, data.mean(), data.std())
+    normal_line =ax.plot(x_range, normal, label='normal pmf', color='r')
+    ax.set_title(f"\nmean:{data.mean()} std:{data.std()}\n{stats.kstest(data, 'norm',args=[data.mean(), data.std()])}")
+    ax.set_xlabel(name)
+    plt.show()
 
 def create_user_profile():
     main_df = clean_data_types(create_smaller_main_df())
@@ -738,17 +758,14 @@ lasso_attempt(user_profile_df.drop(['user_id','estimated_created_date'],axis=1))
 #correlation_maps_lasso(user_profile_df)
 #df_to_csv(user_profile_df, 'user_profile.csv')
 user_profile_df = csv_to_df('user_profile.csv')
+user_profile_df['estimated_created_date'] = user_profile_df['estimated_created_date'].astype('datetime64[ns]')
 
 #logistic_regression(user_profile_df)
-linear_regression(user_profile_df.loc[user_profile_df['user_active_yn']==1])
+#linear_regression(user_profile_df.loc[user_profile_df['user_active_yn']==1])
+
+dec_vs_other_months(user_profile_df[['user_id','user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']])
 
 
-# plt.hist(counts_df['entry_chosen_datetime_cnt'], color='cyan', label='unique_days_with_entries')
-# plt.hist(counts_df['entry_id_cnt'],alpha=0.7, color='pink', label='data_points_per_day')
-# plt.ylabel('number of users')
-# plt.xlabel('count per variable')
-# plt.legend()
-# plt.show()
 # plt.scatter(counts_df['entry_chosen_datetime_cnt'], counts_df['entry_id_cnt'])
 # plt.xlabel("entry_chosen_datetime_cnt")
 # plt.ylabel("entry_id_cnt")
