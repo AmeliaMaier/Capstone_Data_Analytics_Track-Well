@@ -63,13 +63,13 @@ def logistic_regression(df):
     modelCV = LogisticRegression()
     scoring = 'accuracy'
     results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f"10-fold cross validation average accuracy: {results.mean()}")
+    print(f"10-fold cross validation average accuracy: {results.mean():.2f}")
     scoring = 'recall'
     results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f"10-fold cross validation average recall: {results.mean()}")
+    print(f"10-fold cross validation average recall: {results.mean():.2f}")
     scoring = 'precision'
     results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f"10-fold cross validation average precision: {results.mean()}")
+    print(f"10-fold cross validation average precision: {results.mean():.2f}")
     print(classification_report(y_test, y_pred))
 
     print_roc_curve(y_test, logreg, X_test)
@@ -109,19 +109,16 @@ def logistic_balanced(df):
     modelCV = LogisticRegression()
     scoring = 'accuracy'
     results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f"10-fold cross validation average accuracy: {results.mean()}")
+    print(f"10-fold cross validation average accuracy: {results.mean():.2f}")
     scoring = 'recall'
     results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f"10-fold cross validation average recall: {results.mean()}")
+    print(f"10-fold cross validation average recall: {results.mean():.2f}")
     scoring = 'precision'
     results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f"10-fold cross validation average precision: {results.mean()}")
+    print(f"10-fold cross validation average precision: {results.mean():.2f}")
     print(classification_report(y_test, y_pred))
 
-    plt.scatter(logreg.predict_proba(X_test)[:,1], y_test)
-    plt.ylabel("Actual")
-    plt.xlabel("Predicted")
-    plt.show()
+    print_roc_curve(y_test, logreg, X_test)
 
 def print_roc_curve(y_test, logreg, X_test):
     logit_roc_auc = roc_auc_score(y_test, logreg.predict(X_test))
@@ -133,6 +130,7 @@ def print_roc_curve(y_test, logreg, X_test):
     plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic')
     plt.legend(loc="lower right")
     plt.savefig('Log_ROC')
     plt.show()
@@ -512,8 +510,8 @@ def dec_vs_other_months(hypothesis_df):
 
     #dec sample for H on user_active_score
     print("Running ttest on user_active score for Dec vs all other months")
-    print(f"Dec Average: {dec_active['user_activity_score'].mean()}")
-    print(f'Other Average: {other_active["user_activity_score"].mean()}')
+    print(f"Dec Average: {dec_active['user_activity_score'].mean():.2f}")
+    print(f'Other Average: {other_active["user_activity_score"].mean():.2f}')
     hypothesis_df_Dec_sample = dec_active.sample(len(other_active.index))
     user_active_score_ttest = stats.ttest_ind(hypothesis_df_Dec_sample['user_activity_score'], other_active['user_activity_score'])
     print(user_active_score_ttest)
@@ -521,8 +519,8 @@ def dec_vs_other_months(hypothesis_df):
 
     #dec sample for H on user activity yn
     print("Running ttest on user active yn for Dec vs all other months")
-    print(f"Dec Average: {hypothesis_df_Dec['user_active_yn'].mean()}")
-    print(f'Other Average: {hypothesis_df_not_Dec["user_active_yn"].mean()}')
+    print(f"Dec Average: {hypothesis_df_Dec['user_active_yn'].mean():.2f}")
+    print(f'Other Average: {hypothesis_df_not_Dec["user_active_yn"].mean():.2f}')
     hypothesis_df_Dec_sample = hypothesis_df_Dec.sample(len(hypothesis_df_not_Dec.index))
     user_active_ttest = stats.ttest_ind(hypothesis_df_Dec_sample['user_active_yn'], hypothesis_df_not_Dec['user_active_yn'])
     print(user_active_ttest)
@@ -631,7 +629,7 @@ def plot_histogram_with_normal(data, name):
     ax.hist(data, normed=True)
     normal = stats.norm.pdf(x_range, data.mean(), data.std())
     normal_line =ax.plot(x_range, normal, label='normal pmf', color='r')
-    ax.set_title(f"\nmean:{data.mean()} std:{data.std()}\n{stats.kstest(data, 'norm',args=[data.mean(), data.std()])}")
+    ax.set_title(f"\nmean:{data.mean():.2f} std:{data.std():.2f}\nKS Test P value:{stats.kstest(data, 'norm',args=[data.mean(), data.std()])[1]:.2f}")
     ax.set_xlabel(name)
     plt.show()
 
@@ -753,10 +751,10 @@ user_profile_df['estimated_created_date'] = user_profile_df['estimated_created_d
 
 
 #logistic_regression(user_profile_df)
-logistic_balanced(user_profile_df)
+#logistic_balanced(user_profile_df)
 #linear_regression(user_profile_df.loc[user_profile_df['user_active_yn']==1])
 
-#dec_vs_other_months(user_profile_df[['user_id','user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']])
+dec_vs_other_months(user_profile_df[['user_id','user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']])
 
 
 # plt.scatter(counts_df['entry_chosen_datetime_cnt'], counts_df['entry_id_cnt'])
