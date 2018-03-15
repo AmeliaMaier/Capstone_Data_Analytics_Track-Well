@@ -22,7 +22,7 @@ The questions I am answering in this section are:
   * If I have time, I will also look at:
     - Based on past involvement or profile data, can we predict how long a user will remain active?
     - Based on past involvement or profile data, can we predict how long a user will go inactive or which will go inactive?
-### Exploratory Data Analysis 
+### Exploratory Data Analysis and Data Cleaning/Creation 
 There are no pre-defined site involvment levels, tracking of how long a user has been active/inactive or other metrix tracking so those features will have to be created from existing data.
 - Total days active: (last date a user entered data on the site) - (the day the user signed up on the site)
 - Days since last activity: 03/03/2018 - (last date a user entered data on the site)
@@ -48,6 +48,13 @@ There appears to have been a manual data load into the database at somepoint as 
 - dup_protocol_active: changed to a yes/no instead of actual protocol hashes
 - height_likelihood: the probability that the height reported exists in the adult population
   * This was determined with a very forgiving normal distribution based on the average of the mean heights for men and women and adding together the standard distribution for the two groups. It is not meant to predict if they were accurate but to simply show where heights provided were not feasible (40 cm for example).
+  
+Features that will probably be useful in the future but haven't been created yet:
+- Change User Active YN to User Active Ever YN and User Currently Active YN
+- Longest time between logins
+- Current time since last login
+- Months since signup
+- 
   
 Because these features are based on existing features, there are likely to be highly correlated sets in the full feature map. I intend to pick only some of the features, avoiding correlated groups, for the final models.
 
