@@ -1,10 +1,10 @@
 # Track-well
 ## Data Science Capstone Project
 
-My capstone is using data from the website Trackwell. This site was created to allow users to upload 'protocols' and 'hypothesis tests' for themselves and others to use with the hopes of croudsourcing data collection and allowing conclusions to be drawn on the 'protocols' or experiments being run. For now, Trackwell needs to know if it is possible to predict which users will provide the most data and/or when a user might stop using the service. Going forward, it will also be important to know how believable a given users entries are.
+My capstone is using data from the website Track-well. This site was created to allow users to upload 'protocols' and 'hypothesis tests' for themselves and others to use with the hopes of croudsourcing data collection and allowing conclusions to be drawn on the 'protocols' or experiments being run. For now, Track-well needs to know if it is possible to predict which users will provide the most data and/or when a user might stop using the service. Going forward, it will also be important to know how believable a given users entries are.
 
 ### Questions
-The original questions that the owner of Trackwell asked me were:
+The original questions that the owner of Track-well asked me were:
 - Can we develop a score for user participation so I can rank users and find those who are most involved?
 - Can we predict whether a user will be more or less involved in the future?
 - Can we develop a threshold below which a user isn't inputting enough data for us to do any analysis?
