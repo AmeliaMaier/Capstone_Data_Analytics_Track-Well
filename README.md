@@ -112,10 +112,10 @@ __TTest Assumptions:__
   * Independent observations: Each record is a seperate and unique account. No account can have two creation months.
   * Homogeneity: The standard deviations are very close for the YN populations but are slightly different for the Score populations. For the time being, I am going forwards assuming they are close enought, but it does make results for this comparison somewhat more questionable.
   * Normality: bootstrapped sample means for each population in each test
-  :-------------------------:|:-------------------------:
-  ![](images/Bootstrapped_Dec_avg_ActiveYN.png) |  ![](images/Bootstrapped_Other_avg_ActiveYN.png)
-  :-------------------------:|:-------------------------:
-  ![](images/Bootstrapped_Dec_avg_Activity_score.png) |  ![](images/Bootstrapped_Other_avg_Activity_score.png)
+  
+  ![](images/Bootstrapped_Dec_avg_ActiveYN.png)  ![](images/Bootstrapped_Other_avg_ActiveYN.png)
+
+  ![](images/Bootstrapped_Dec_avg_Activity_score.png)  ![](images/Bootstrapped_Other_avg_Activity_score.png)
   
   ![](images/Dec-vs-other_Active.png)
   ![](images/Dec-vs-other_ActiveScore.png)
