@@ -118,7 +118,10 @@ def logistic_balanced(df):
     print(f"10-fold cross validation average precision: {results.mean()}")
     print(classification_report(y_test, y_pred))
 
-    print_roc_curve(y_test, logreg, X_test)
+    plt.scatter(logreg.predict_proba(X_test)[:,1], y_test)
+    plt.ylabel("Actual")
+    plt.xlabel("Predicted")
+    plt.show()
 
 def print_roc_curve(y_test, logreg, X_test):
     logit_roc_auc = roc_auc_score(y_test, logreg.predict(X_test))
@@ -130,7 +133,6 @@ def print_roc_curve(y_test, logreg, X_test):
     plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic')
     plt.legend(loc="lower right")
     plt.savefig('Log_ROC')
     plt.show()
