@@ -283,87 +283,71 @@ User Days Inactive Coefficients: ![User Days Inactive Coefficients](images/lasso
 21      0.000000  menstruation_answered   0.000000
 ```
 ### Logistic Regression on User Active YN
-I started by feeding the predictors selected by Lasso directly in a Logistic model and seeing how it did:
+I started by standardizing and using all the predictors selected by Lasso in a basic Logistic model and seeing how it did. I am using the API from Statsmodels to help evaluate results:
 ```python
-                Optimization terminated successfully.
-                 Current function value: 0.526785
-                 Iterations 6
-                                   Logit Regression Results
-        ==============================================================================
-        Dep. Variable:         user_active_yn   No. Observations:                 2933
-        Model:                          Logit   Df Residuals:                     2921
-        Method:                           MLE   Df Model:                           11
-        Date:                Wed, 14 Mar 2018   Pseudo R-squ.:                  0.2185
-        Time:                        16:15:48   Log-Likelihood:                -1545.1
-        converged:                       True   LL-Null:                       -1977.1
-                                                LLR p-value:                3.387e-178
-        =========================================================================================
-                                    coef    std err          z      P>|z|      [0.025      0.975]
-        -----------------------------------------------------------------------------------------
-        dup_protocol_started      2.0052      0.109     18.390      0.000       1.792       2.219
-        caffeine_yn               0.5336      0.140      3.799      0.000       0.258       0.809
-        married_yn                0.3289      0.130      2.537      0.011       0.075       0.583
-        usual_activity_len        0.0076      0.002      3.052      0.002       0.003       0.012
-        alcohol_yn                0.1439      0.140      1.031      0.303      -0.130       0.417
-        bio_sex_answered         -2.1063      0.165    -12.738      0.000      -2.430      -1.782
-        bio_sex                  -0.0544      0.151     -0.360      0.719      -0.351       0.242
-        menstruation_yn           0.3793      0.198      1.915      0.055      -0.009       0.767
-        blood_type_answered       0.4903      0.201      2.434      0.015       0.096       0.885
-        usual_diet_len            0.0036      0.002      1.918      0.055   -7.82e-05       0.007
-        usual_medications_len     0.0105      0.005      2.104      0.035       0.001       0.020
-        usual_conditions_len     -0.0006      0.002     -0.241      0.809      -0.005       0.004
-        =========================================================================================
-
-        Accuracy of logistic regression classifier on test set: 0.7761363636363636
-
-        10-fold cross validation average accuracy: 0.7973431210040255
-        10-fold cross validation average recall: 0.8910320505409649
-        10-fold cross validation average precision: 0.6895829278788901
-
-                     precision    recall  f1-score   support
-                  0       0.89      0.70      0.79       520
-                  1       0.67      0.88      0.76       360
-        avg / total       0.80      0.78      0.78       880
+           Current function value: 0.457499
+         Iterations 7
+                           Logit Regression Results                           
+==============================================================================
+Dep. Variable:         user_active_yn   No. Observations:                 2933
+Model:                          Logit   Df Residuals:                     2921
+Method:                           MLE   Df Model:                           11
+Date:                Thu, 15 Mar 2018   Pseudo R-squ.:                  0.3213
+Time:                        14:02:14   Log-Likelihood:                -1341.8
+converged:                       True   LL-Null:                       -1977.1
+                                        LLR p-value:                1.062e-265
+==============================================================================
+                 coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+x1             1.1351      0.051     22.392      0.000       1.036       1.235
+x2             0.2093      0.075      2.801      0.005       0.063       0.356
+x3             0.1291      0.064      2.021      0.043       0.004       0.254
+x4             0.2876      0.099      2.907      0.004       0.094       0.481
+x5             0.0387      0.067      0.578      0.563      -0.092       0.170
+x6             0.1778      0.074      2.412      0.016       0.033       0.322
+x7             0.0210      0.077      0.274      0.784      -0.130       0.172
+x8             0.1839      0.067      2.736      0.006       0.052       0.316
+x9             0.1571      0.061      2.595      0.009       0.038       0.276
+x10            0.2875      0.118      2.428      0.015       0.055       0.520
+x11            0.4187      0.144      2.904      0.004       0.136       0.701
+x12           -0.0589      0.077     -0.760      0.447      -0.211       0.093
+==============================================================================
 ```
-![](images/ROC-1.png)
 
-I then standardized each feature and dropped the least significant ones again:
-```pthon
-        Optimization terminated successfully.
-             Current function value: 0.526996
-             Iterations 6
-                               Logit Regression Results
-    ==============================================================================
-    Dep. Variable:         user_active_yn   No. Observations:                 2933
-    Model:                          Logit   Df Residuals:                     2924
-    Method:                           MLE   Df Model:                            8
-    Date:                Wed, 14 Mar 2018   Pseudo R-squ.:                  0.2182
-    Time:                        16:28:52   Log-Likelihood:                -1545.7
-    converged:                       True   LL-Null:                       -1977.1
-                                            LLR p-value:                6.059e-181
-    =========================================================================================
-                                coef    std err          z      P>|z|      [0.025      0.975]
-    -----------------------------------------------------------------------------------------
-    dup_protocol_started      2.0102      0.109     18.451      0.000       1.797       2.224
-    caffeine_yn               0.5956      0.125      4.768      0.000       0.351       0.840
-    married_yn                0.3423      0.129      2.654      0.008       0.090       0.595
-    usual_activity_len        0.0077      0.002      3.134      0.002       0.003       0.012
-    bio_sex_answered         -2.1518      0.099    -21.661      0.000      -2.347      -1.957
-    menstruation_yn           0.4179      0.153      2.740      0.006       0.119       0.717
-    blood_type_answered       0.4939      0.201      2.456      0.014       0.100       0.888
-    usual_diet_len            0.0036      0.002      1.983      0.047    4.08e-05       0.007
-    usual_medications_len     0.0106      0.005      2.153      0.031       0.001       0.020
-    =========================================================================================
-
-    Accuracy of logistic regression classifier on test set: 0.7784090909090909
-
-    10-fold cross validation average accuracy: 0.7992967085010656
-    10-fold cross validation average recall: 0.9086556035571437
-    10-fold cross validation average precision: 0.6866515937577335
-
-                 precision    recall  f1-score   support
-              0       0.92      0.69      0.79       520
-              1       0.67      0.91      0.77       360
-    avg / total       0.82      0.78      0.78       880
+With just a train/test split on the logistic regression I got:
 ```
-![](images/ROC-2.png)
+Mean accuracy of logistic regression classifier on test set: 0.7784090909090909
+                                   [[357 163]
+                                    [ 32 328]]
+                                      tn, fp
+                                      fn, tp
+
+    estimatedCoefficients               features      sort
+0                1.409541   dup_protocol_started  1.409541
+5                0.350281       bio_sex_answered  0.350281
+3                0.277375     usual_activity_len  0.277375
+1                0.221156            caffeine_yn  0.221156
+7                0.150474        menstruation_yn  0.150474
+2                0.117282             married_yn  0.117282
+8                0.113480    blood_type_answered  0.113480
+11               0.107046   usual_conditions_len  0.107046
+9                0.095546         usual_diet_len  0.095546
+10               0.055545  usual_medications_len  0.055545
+4                0.049206             alcohol_yn  0.049206
+6                0.032716                bio_sex  0.032716
+
+Estimated intercept: [-0.79332413]
+```
+That model with KFold cross validation:
+``` 
+10-fold cross validation average accuracy: 0.7968553161259767
+10-fold cross validation average recall: 0.8910320505409649
+10-fold cross validation average precision: 0.6889490663275973
+             precision    recall  f1-score   support
+
+          0       0.92      0.69      0.79       520
+          1       0.67      0.91      0.77       360
+avg / total       0.82      0.78      0.78       880
+
+```
+![](images/ROC_1.png)
