@@ -751,10 +751,12 @@ user_profile_df['estimated_created_date'] = user_profile_df['estimated_created_d
 
 
 #logistic_regression(user_profile_df)
-#logistic_balanced(user_profile_df)
+print('without dec')
+without_dec = user_profile_df.loc[user_profile_df['estimated_created_date'].dt.month < 12]
+logistic_balanced(without_dec)
 #linear_regression(user_profile_df.loc[user_profile_df['user_active_yn']==1])
 
-dec_vs_other_months(user_profile_df[['user_id','user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']])
+#dec_vs_other_months(user_profile_df[['user_id','user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']])
 
 
 # plt.scatter(counts_df['entry_chosen_datetime_cnt'], counts_df['entry_id_cnt'])
