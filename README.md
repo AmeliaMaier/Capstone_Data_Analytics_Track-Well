@@ -351,3 +351,7 @@ avg / total       0.82      0.78      0.78       880
 
 ```
 ![](images/ROC_1.png)
+
+The results from a basic logistic regression surprised me. The model is consistently YES bias when the data is actually NO bias.
+
+![](images/Active_YN.png)
