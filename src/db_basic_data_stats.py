@@ -74,6 +74,52 @@ def logistic_regression(df):
 
     print_roc_curve(y_test, logreg, X_test)
 
+
+def logistic_balanced(df):
+    logreg = LogisticRegression()
+    columns = ['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']
+    #X=df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']]
+    #X=df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'bio_sex_answered', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len']]
+    #X=stand(df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'bio_sex_answered', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len']])
+    X=stand(df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']])
+    y=df['user_active_yn']
+
+    # logit_model=sm.Logit(y,X)
+    # result=logit_model.fit()
+    # print(result.summary())
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+    logreg = LogisticRegression(class_weight='balanced')
+    logreg.fit(X_train, y_train)
+    y_pred = logreg.predict(X_test)
+    print("With train test fix")
+    print(f'Mean accuracy of logistic regression classifier on test set: {logreg.score(X_test, y_test)}')
+    print(confusion_matrix(y_test, y_pred))
+    print("tn, fp\nfn, tp")
+    print('\n\n')
+
+    coef_list = pd.DataFrame(data = {'features':columns, 'estimatedCoefficients':logreg.coef_.ravel()})
+    coef_list['sort'] = coef_list.estimatedCoefficients.abs()
+    print(coef_list.sort_values(by='sort', ascending=False))
+    print(f'Estimated intercept: {logreg.intercept_}')
+    print_roc_curve(y_test, logreg, X_test)
+
+    print("With KFold cross validation")
+    kfold = model_selection.KFold(n_splits=10, random_state=7)
+    modelCV = LogisticRegression()
+    scoring = 'accuracy'
+    results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
+    print(f"10-fold cross validation average accuracy: {results.mean()}")
+    scoring = 'recall'
+    results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
+    print(f"10-fold cross validation average recall: {results.mean()}")
+    scoring = 'precision'
+    results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
+    print(f"10-fold cross validation average precision: {results.mean()}")
+    print(classification_report(y_test, y_pred))
+
+    print_roc_curve(y_test, logreg, X_test)
+
 def print_roc_curve(y_test, logreg, X_test):
     logit_roc_auc = roc_auc_score(y_test, logreg.predict(X_test))
     fpr, tpr, thresholds = roc_curve(y_test, logreg.predict_proba(X_test)[:,1])
@@ -699,7 +745,13 @@ lasso_attempt(user_profile_df.drop(['user_id','estimated_created_date'],axis=1))
 user_profile_df = csv_to_df('user_profile.csv')
 user_profile_df['estimated_created_date'] = user_profile_df['estimated_created_date'].astype('datetime64[ns]')
 
-logistic_regression(user_profile_df)
+# plt.hist(user_profile_df['user_active_yn'] )
+# plt.xlabel("Users Active YN")
+# plt.show()
+
+
+#logistic_regression(user_profile_df)
+logistic_balanced(user_profile_df)
 #linear_regression(user_profile_df.loc[user_profile_df['user_active_yn']==1])
 
 #dec_vs_other_months(user_profile_df[['user_id','user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']])
