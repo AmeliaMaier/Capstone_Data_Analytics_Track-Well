@@ -98,6 +98,10 @@ Activity Score By Signup Month: ![Activity Score By Signup Month](images/monthly
 Signups By Month: ![Signups By Month](images/EDA_Signups_Per_Month-after_start_fix.png)
 
 ## Hypothesis Test
+
+  ![](images/Dec-vs-other_Active.png)
+  ![](images/Dec-vs-other_ActiveScore.png)
+  
 __Question:__ Is there a statistical difference in activity level for users that signed up due to a large push from a fitness blogger when compared with everyone else?
 
 >>>__H<sub>0</sub>:__ There is no difference in involvment metrics for Dec when compared to the rest of the year.
@@ -121,9 +125,6 @@ __TTest Assumptions:__
   __Activity Scores After Removing Inactive Users:__
    ![](images/Bootstrapped_Dec_avg_Activity_score.png)  ![](images/Bootstrapped_Other_avg_Activity_score.png)
    
-  ![](images/Dec-vs-other_Active.png)
-  ![](images/Dec-vs-other_ActiveScore.png)
-
 Running ttest on User Activity Scores for Dec vs all other months
 
 >>>Dec Average: 5.488265227289548
