@@ -503,7 +503,8 @@ def dec_vs_other_months(hypothesis_df):
     #hypothesis_df['estimated_created_date'] = hypothesis_df['estimated_created_date'].astype('datetime64[ns]')
     hypothesis_df_Dec = hypothesis_df.loc[hypothesis_df['estimated_created_date'].dt.month == 12]
     hypothesis_df_not_Dec = hypothesis_df.loc[hypothesis_df['estimated_created_date'].dt.month < 12]
-
+    dec_active = hypothesis_df_not_Dec.loc[hypothesis_df_not_Dec['user_active_yn']==1]
+    other_active = hypothesis_df_not_Dec.loc[hypothesis_df_not_Dec['user_active_yn']==1]
     # plt.hist(hypothesis_df_Dec['user_activity_score'], color='cyan', label='Dec Active Scores')
     # plt.hist(hypothesis_df_not_Dec['user_activity_score'],alpha=0.7, color='pink', label='Year Active Scores')
     # plt.ylabel('number of users')
@@ -518,17 +519,17 @@ def dec_vs_other_months(hypothesis_df):
     # plt.legend()
     # plt.show()
 
-    bootstrap_ci(hypothesis_df_Dec['user_activity_score'], 'Dec User Activity Score')
-    bootstrap_ci(hypothesis_df_not_Dec['user_activity_score'], 'Not Dec User Activity Score')
+    bootstrap_ci(dec_active['user_activity_score'], 'Dec User Activity Score')
+    bootstrap_ci(other_active['user_activity_score'], 'Not Dec User Activity Score')
     bootstrap_ci(hypothesis_df_Dec['user_active_yn'], 'Dec User Active YN')
     bootstrap_ci(hypothesis_df_not_Dec['user_active_yn'], 'Not Dec User Active YN')
 
     #dec sample for H on user_active_score
     print("Running ttest on user_active score for Dec vs all other months")
-    print(f"Dec Average: {hypothesis_df_Dec['user_activity_score'].mean()}")
-    print(f'Other Average: {hypothesis_df_not_Dec["user_activity_score"].mean()}')
-    hypothesis_df_Dec_sample = hypothesis_df_Dec.sample(len(hypothesis_df_not_Dec.index))
-    user_active_score_ttest = stats.ttest_ind(hypothesis_df_Dec_sample['user_activity_score'], hypothesis_df_not_Dec['user_activity_score'])
+    print(f"Dec Average: {dec_active['user_activity_score'].mean()}")
+    print(f'Other Average: {other_active["user_activity_score"].mean()}')
+    hypothesis_df_Dec_sample = dec_active.sample(len(other_active.index))
+    user_active_score_ttest = stats.ttest_ind(hypothesis_df_Dec_sample['user_activity_score'], other_active['user_activity_score'])
     print(user_active_score_ttest)
     #Ttest_indResult(statistic=-5.9016620625301828, pvalue=4.0248341180765505e-09)
 
