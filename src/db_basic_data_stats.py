@@ -18,6 +18,7 @@ from sklearn import model_selection
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import classification_report
 from pandas.plotting import scatter_matrix
+from sklearn.metrics import confusion_matrix
 import statsmodels.api as sm
 import warnings
 warnings.filterwarnings('ignore')
@@ -30,97 +31,34 @@ psql_password = os.environ.get('PSQL_PASSWORD')
 
 def logistic_regression(df):
     logreg = LogisticRegression()
+    columns = ['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']
     #X=df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']]
     #X=df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'bio_sex_answered', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len']]
-    X=stand(df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'bio_sex_answered', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len']])
+    #X=stand(df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'bio_sex_answered', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len']])
+    X=stand(df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']])
+
     y=df['user_active_yn']
     logit_model=sm.Logit(y,X)
     result=logit_model.fit()
     print(result.summary())
-    '''        Optimization terminated successfully.
-                 Current function value: 0.526785
-                 Iterations 6
-                                   Logit Regression Results
-        ==============================================================================
-        Dep. Variable:         user_active_yn   No. Observations:                 2933
-        Model:                          Logit   Df Residuals:                     2921
-        Method:                           MLE   Df Model:                           11
-        Date:                Wed, 14 Mar 2018   Pseudo R-squ.:                  0.2185
-        Time:                        16:15:48   Log-Likelihood:                -1545.1
-        converged:                       True   LL-Null:                       -1977.1
-                                                LLR p-value:                3.387e-178
-        =========================================================================================
-                                    coef    std err          z      P>|z|      [0.025      0.975]
-        -----------------------------------------------------------------------------------------
-        dup_protocol_started      2.0052      0.109     18.390      0.000       1.792       2.219
-        caffeine_yn               0.5336      0.140      3.799      0.000       0.258       0.809
-        married_yn                0.3289      0.130      2.537      0.011       0.075       0.583
-        usual_activity_len        0.0076      0.002      3.052      0.002       0.003       0.012
-        alcohol_yn                0.1439      0.140      1.031      0.303      -0.130       0.417
-        bio_sex_answered         -2.1063      0.165    -12.738      0.000      -2.430      -1.782
-        bio_sex                  -0.0544      0.151     -0.360      0.719      -0.351       0.242
-        menstruation_yn           0.3793      0.198      1.915      0.055      -0.009       0.767
-        blood_type_answered       0.4903      0.201      2.434      0.015       0.096       0.885
-        usual_diet_len            0.0036      0.002      1.918      0.055   -7.82e-05       0.007
-        usual_medications_len     0.0105      0.005      2.104      0.035       0.001       0.020
-        usual_conditions_len     -0.0006      0.002     -0.241      0.809      -0.005       0.004
-        =========================================================================================
 
-        Accuracy of logistic regression classifier on test set: 0.7761363636363636
-
-        10-fold cross validation average accuracy: 0.7973431210040255
-        10-fold cross validation average recall: 0.8910320505409649
-        10-fold cross validation average precision: 0.6895829278788901
-
-                     precision    recall  f1-score   support
-                  0       0.89      0.70      0.79       520
-                  1       0.67      0.88      0.76       360
-        avg / total       0.80      0.78      0.78       880'''
-
-    '''vs 2
-        Optimization terminated successfully.
-             Current function value: 0.526996
-             Iterations 6
-                               Logit Regression Results
-    ==============================================================================
-    Dep. Variable:         user_active_yn   No. Observations:                 2933
-    Model:                          Logit   Df Residuals:                     2924
-    Method:                           MLE   Df Model:                            8
-    Date:                Wed, 14 Mar 2018   Pseudo R-squ.:                  0.2182
-    Time:                        16:28:52   Log-Likelihood:                -1545.7
-    converged:                       True   LL-Null:                       -1977.1
-                                            LLR p-value:                6.059e-181
-    =========================================================================================
-                                coef    std err          z      P>|z|      [0.025      0.975]
-    -----------------------------------------------------------------------------------------
-    dup_protocol_started      2.0102      0.109     18.451      0.000       1.797       2.224
-    caffeine_yn               0.5956      0.125      4.768      0.000       0.351       0.840
-    married_yn                0.3423      0.129      2.654      0.008       0.090       0.595
-    usual_activity_len        0.0077      0.002      3.134      0.002       0.003       0.012
-    bio_sex_answered         -2.1518      0.099    -21.661      0.000      -2.347      -1.957
-    menstruation_yn           0.4179      0.153      2.740      0.006       0.119       0.717
-    blood_type_answered       0.4939      0.201      2.456      0.014       0.100       0.888
-    usual_diet_len            0.0036      0.002      1.983      0.047    4.08e-05       0.007
-    usual_medications_len     0.0106      0.005      2.153      0.031       0.001       0.020
-    =========================================================================================
-
-    Accuracy of logistic regression classifier on test set: 0.7784090909090909
-
-    10-fold cross validation average accuracy: 0.7992967085010656
-    10-fold cross validation average recall: 0.9086556035571437
-    10-fold cross validation average precision: 0.6866515937577335
-
-                 precision    recall  f1-score   support
-              0       0.92      0.69      0.79       520
-              1       0.67      0.91      0.77       360
-    avg / total       0.82      0.78      0.78       880
-    '''
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
     logreg = LogisticRegression()
     logreg.fit(X_train, y_train)
     y_pred = logreg.predict(X_test)
-    print(f'Accuracy of logistic regression classifier on test set: {logreg.score(X_test, y_test)}')
+    print("With train test fix")
+    print(f'Mean accuracy of logistic regression classifier on test set: {logreg.score(X_test, y_test)}')
+    print(confusion_matrix(y_test, y_pred))
+    print("tn, fp\nfn, tp")
+    print('\n\n')
 
+    coef_list = pd.DataFrame(data = {'features':columns, 'estimatedCoefficients':logreg.coef_.ravel()})
+    coef_list['sort'] = coef_list.estimatedCoefficients.abs()
+    print(coef_list.sort_values(by='sort', ascending=False))
+    print(f'Estimated intercept: {logreg.intercept_}')
+    print_roc_curve(y_test, logreg, X_test)
+
+    print("With KFold cross validation")
     kfold = model_selection.KFold(n_splits=10, random_state=7)
     modelCV = LogisticRegression()
     scoring = 'accuracy'
@@ -761,10 +699,10 @@ lasso_attempt(user_profile_df.drop(['user_id','estimated_created_date'],axis=1))
 user_profile_df = csv_to_df('user_profile.csv')
 user_profile_df['estimated_created_date'] = user_profile_df['estimated_created_date'].astype('datetime64[ns]')
 
-#logistic_regression(user_profile_df)
+logistic_regression(user_profile_df)
 #linear_regression(user_profile_df.loc[user_profile_df['user_active_yn']==1])
 
-dec_vs_other_months(user_profile_df[['user_id','user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']])
+#dec_vs_other_months(user_profile_df[['user_id','user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']])
 
 
 # plt.scatter(counts_df['entry_chosen_datetime_cnt'], counts_df['entry_id_cnt'])
