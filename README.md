@@ -10,7 +10,6 @@ The original questions that the owner of Trackwell asked me were:
 - Can we develop a threshold below which a user isn't inputting enough data for us to do any analysis?
 
 The questions I am answering in this section are:
-
 - Is there a statistical difference in activity level, days active, and/or amount of data provided by users that signed up due to a large push from a fitness blogger?
 - Can we develop a score for user participation so I can rank users and find those who are most involved?
   * I am using assigning an activity score per user based on the number of data points they have provided and the number of days they have been active on the service.
@@ -18,19 +17,22 @@ The questions I am answering in this section are:
   * Ultimatly, the final answer for this question will probably be a time series model. For now, I will see what I can do with logistic and linear modeling.
   * I am starting with:
     - Can we predict if a user will be involved at all based on their profile data?
-    - If they will be involved, can we prodict how involved based on their profile data?
   * If I have time, I will also look at:
+    - Can we predict which users will go inactive based on their profile data?
+    - If they will be active, can we predict if they will complete a protocol?
+    - If they will be involved, can we prodict how involved based on their profile data?
     - Based on past involvement or profile data, can we predict how long a user will remain active?
-    - Based on past involvement or profile data, can we predict how long a user will go inactive or which will go inactive?
+    - Based on past involvement or profile data, can we predict how long a user will go inactive?
 ### Exploratory Data Analysis and Data Cleaning/Creation 
-There are no pre-defined site involvment levels, tracking of how long a user has been active/inactive or other metrix tracking so those features will have to be created from existing data.
+There are no pre-defined site involvment levels, tracking of how long a user has been active/inactive or other metric tracking so those features will have to be created from existing data.
 - Total days active: (last date a user entered data on the site) - (the day the user signed up on the site)
-- Days since last activity: 03/03/2018 - (last date a user entered data on the site)
+- Days since last activity: (day data was pulled) - (last date a user entered data on the site)
 - Estimated total data points: (number of unique, non-null data points associated with their profile data) + (number of followup entries)
 - User activity score: (Estimated total data points) / (Total days active)
 - User active yes/no: yes if user activity score is above 0
 
-There appears to have been a manual data load into the database at somepoint as there are some users with 0-1 Total days active but 2000 data points. In those cases, the first date with an entry assigned to it will take the place of theire sign up date. Profile data was also manipulated to determine if the data entered or the the fact that anything was entered was more important to predicting future activity:
+There appears to have been a manual data load into the database at somepoint as there are some users with 0-1 Total days active but 2000 data points. In those cases, the first date with an entry assigned to it will take the place of theire sign up date. Profile data was also manipulated to determine if the data entered or the the fact that anything was entered was more important to predicting future activity. For features with a lot of nulls, I chose between assuming the median value for the field or dropping the feature on a per feature basis. I made the decision based on the likelihood of the median value being correct. For example, I dropped the raw blood type feature after determinning if it was answered or not because I have no way of knowing which blood type is correct but I assumed a null in married simply meant no because there weren't very many nulls for the feature and I assume a person is more likely to answer a question they feel pertains to them. I wanted to keep as many features early on as possible as I didn't know if bothering to answer the questions was actually more important than the final answer provided. For profile fields that were open text, I took a character count as the simplest way of summarizing the complexity of their input. Once I created a numeric represintative for the text fields, I dropped them from modeling.
+
 - usual_activity_len: the character count of the entry in the usual_activity field
 - dup_protocol_started: changed to a yes/no instead of actual protocol hashes
 - dup_protocol_finished: changed to a yes/no instead of actual protocol hashes
@@ -49,12 +51,21 @@ There appears to have been a manual data load into the database at somepoint as 
 - height_likelihood: the probability that the height reported exists in the adult population
   * This was determined with a very forgiving normal distribution based on the average of the mean heights for men and women and adding together the standard distribution for the two groups. It is not meant to predict if they were accurate but to simply show where heights provided were not feasible (40 cm for example).
   
+I later came back and dropped both dup_protocol_finished and dup_protocol_active because they were systematically set regardless of user interaction after a protocol was started. 
+
 Features that will probably be useful in the future but haven't been created yet:
 - Change User Active YN to User Active Ever YN and User Currently Active YN
 - Longest time between logins
 - Current time since last login
 - Months since signup
-- 
+- Entries Other Than Profile YN
+- Number of protocols signed up for
+- Which protocol(s) signed up for
+- How they found the site
+- Which medications each person is on
+- What pre-existing conditions they have 
+- Number of protocols completed
+- Likelihood of inputs for the entries (similar to likelihood of height) would need to be written on a per entry-type basis to determine if someone's data in a given protocol can be used towards completing that protocol's hypothesis test.
   
 Because these features are based on existing features, there are likely to be highly correlated sets in the full feature map. I intend to pick only some of the features, avoiding correlated groups, for the final models.
 
@@ -115,8 +126,8 @@ Running ttest on Users Active YN for Dec vs all other months
 
 __Conclusion:__ In metrics that have been normalized for total time on the system, there does appear to be a statisticaly significant difference in users who signed up in December and all other users. Unfortunantly for Trackwell, this segment of their users appear to be less likely to be active at all on the site and, if they are active, to provide less data per day than other users. 
 
-## Logistic and Linear Regression
-### Lasso to Pick Features
+### Logistic and Linear Regression
+#### Lasso to Pick Features
 
 User Active YN Coefficients: ![User Active YN Coefficients](images/lasso_user_active_yn.png)
 ```python
@@ -253,7 +264,7 @@ User Days Inactive Coefficients: ![User Days Inactive Coefficients](images/lasso
 15      0.000000       alcohol_answered   0.000000
 21      0.000000  menstruation_answered   0.000000
 ```
-## Logistic Regression on User Active YN
+### Logistic Regression on User Active YN
 I started by feeding the predictors selected by Lasso directly in a Logistic model and seeing how it did:
 ```python
                 Optimization terminated successfully.
