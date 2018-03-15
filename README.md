@@ -127,20 +127,20 @@ __TTest Assumptions:__
    
 Running ttest on User Activity Scores for Dec vs all other months
 
->>>Dec Average: 5.488265227289548
+>>>Dec Average: 5.49
 
->>>Year Average: 5.488265227289548
+>>>Year Average: 5.49
 
 >>>Ttest_indResult(statistic=0.0, pvalue=1.0)
 
 
 Running ttest on Users Active YN for Dec vs all other months
 
->>>Dec Average: 0.30687830687830686
+>>>Dec Average: 0.31
 
->>>Year Average without Dec: 0.5045742434904996
+>>>Year Average without Dec: 0.50
 
->>>Ttest_indResult(statistic=-11.124419257482321, pvalue=3.613288170575678e-28)
+>>>Ttest_indResult(statistic=-11.12, pvalue=3.61e-28)
 
 __Conclusion:__ In metrics that have been normalized for total time on the system, there does appear to be a statisticaly significant difference in users who signed up in December and all other users as far as initial decisions to use or not use the site go. Unfortunantly for Trackwell, this segment of their users appear to be less likely to be active at all on the site; if they do use the site, they seem to provide the same amount of data as users who come to it through other routes.
 
@@ -316,7 +316,7 @@ x12           -0.0589      0.077     -0.760      0.447      -0.211       0.093
 
 With just a train/test split on the logistic regression I got:
 ```
-Mean accuracy of logistic regression classifier on test set: 0.7784090909090909
+Mean accuracy of logistic regression classifier on test set: 0.78
                                    [[357 163]
                                     [ 32 328]]
                                       tn, fp
@@ -340,9 +340,9 @@ Estimated intercept: [-0.79332413]
 ```
 That model with KFold cross validation:
 ``` 
-10-fold cross validation average accuracy: 0.7968553161259767
-10-fold cross validation average recall: 0.8910320505409649
-10-fold cross validation average precision: 0.6889490663275973
+10-fold cross validation average accuracy: 0.80
+10-fold cross validation average recall: 0.90
+10-fold cross validation average precision: 0.69
              precision    recall  f1-score   support
 
           0       0.92      0.69      0.79       520
@@ -352,19 +352,17 @@ avg / total       0.82      0.78      0.78       880
 ```
 ![](images/ROC_1.png)
 
-The results from a basic logistic regression surprised me. The model is consistently YES bias when the data is actually NO bias.
+The results from a basic logistic regression surprised me. The model is consistently 1 bias when the data is actually 0 bias.
 
 ![](images/Active_YN.png)
 
 I then tried with a balanced class weight in the logistic model, but it didn't make very much differance. 
 ```
-Mean accuracy of logistic regression classifier on test set: 0.7784090909090909
+Mean accuracy of logistic regression classifier on test set: 0.78
 [[357 163]
  [ 32 328]]
 tn, fp
 fn, tp
-
-
 
     estimatedCoefficients               features      sort
 0                1.400781   dup_protocol_started  1.400781
@@ -381,14 +379,15 @@ fn, tp
 6                0.030113                bio_sex  0.030113
 Estimated intercept: [-0.38602606]
 With KFold cross validation
-10-fold cross validation average accuracy: 0.7968553161259767
-10-fold cross validation average recall: 0.8910320505409649
-10-fold cross validation average precision: 0.6889490663275973
+10-fold cross validation average accuracy: 0.80
+10-fold cross validation average recall: 0.90
+10-fold cross validation average precision: 0.69
              precision    recall  f1-score   support
 
           0       0.92      0.69      0.79       520
           1       0.67      0.91      0.77       360
-
 avg / total       0.82      0.78      0.78       880
 ```
 ![](images/Roc_balanced.png)
+
+![](image/Predicted_to_Actual.png)
