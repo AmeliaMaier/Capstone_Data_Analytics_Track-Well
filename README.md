@@ -55,4 +55,15 @@ Correlation Heatmap: ![Alt](images/profile_corr_map.png)
 
 After going back and fixing for the dataload, the timebased correlations became more obviouse:
 
+Total Number of Days Active By Signup Month: ![Total Number of Days Active By Signup Month](images/monthly_days_active.png) 
+
+Days Since Last Activity By Signup Month: ![Days Since Last Activity By Signup Month](images/monthly_days_inactive.png) 
+
+And the thought that the blogger's push for January activity (people signing up in December to start in January) was helpful in increasinng the percentage of involvement becomes less likely, though it does seem to have pushed a higher volume of people to the site:
+
+Activity Score By Signup Month: ![Activity Score By Signup Month](images/monthly_activity.png) 
+
+Signups By Month: ![Signups By Month](images/EDA_Signups_Per_Month-after_start_fix.png)
+
+## Hypothesis Test
 
