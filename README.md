@@ -391,4 +391,4 @@ With KFold cross validation
 
 avg / total       0.82      0.78      0.78       880
 ```
-![](images/ROC_balanced.png)
+![](images/Roc_balanced.png)
