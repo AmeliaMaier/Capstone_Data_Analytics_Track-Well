@@ -110,23 +110,25 @@ I used a two population t-test for each metric to determine if there was a stati
 
 __TTest Assumptions:__ 
   * Independent observations: Each record is a seperate and unique account. No account can have two creation months.
-  * Homogeneity: The standard deviations are very close for the YN populations but are slightly different for the Score populations. For the time being, I am going forwards assuming they are close enought, but it does make results for this comparison somewhat more questionable.
-  * Normality: bootstrapped sample means for each population in each test
+  * Homogeneity: The standard deviations are very close for the YN populations but are different for the Score populations. 
+  * Normality: bootstrapped sample means for each population in each test. Because of this, I limited the Score populations to only users who were active (removing all the zeros that are covered in the YN question). 
   
   ![](images/Bootstrapped_Dec_avg_ActiveYN.png)  ![](images/Bootstrapped_Other_avg_ActiveYN.png)
-
-  ![](images/Bootstrapped_Dec_avg_Activity_score.png)  ![](images/Bootstrapped_Other_avg_Activity_score.png)
   
+  __Activity Scores Before Removing Inactive Users:__
+  ![](images/Bootstrapped_Dec_avg_Activity_score_original.png)  ![](images/Bootstrapped_Other_avg_Activity_score_original.png)
+  
+  __Activity Scores After Removing Inactive Users:__
+   ![](images/Bootstrapped_Dec_avg_Activity_score.png)  ![](images/Bootstrapped_Other_avg_Activity_score.png)
+   
   ![](images/Dec-vs-other_Active.png)
   ![](images/Dec-vs-other_ActiveScore.png)
 
 Running ttest on User Activity Scores for Dec vs all other months
 
->>>Dec Average: 0.8813206096033261
-
->>>Year Average without Dec: 2.769237275134839
-
->>>Ttest_indResult(statistic=-14.595829266547389, pvalue=1.391951976598514e-46)
+>>>Dec Average: 5.488265227289548
+>>>Year Average: 5.488265227289548
+>>>Ttest_indResult(statistic=0.0, pvalue=1.0)
 
 
 Running ttest on Users Active YN for Dec vs all other months
@@ -137,7 +139,7 @@ Running ttest on Users Active YN for Dec vs all other months
 
 >>>Ttest_indResult(statistic=-11.124419257482321, pvalue=3.613288170575678e-28)
 
-__Conclusion:__ In metrics that have been normalized for total time on the system, there does appear to be a statisticaly significant difference in users who signed up in December and all other users. Unfortunantly for Trackwell, this segment of their users appear to be less likely to be active at all on the site and, if they are active, to provide less data per day than other users. 
+__Conclusion:__ In metrics that have been normalized for total time on the system, there does appear to be a statisticaly significant difference in users who signed up in December and all other users as far as initial decisions to use or not use the site go. Unfortunantly for Trackwell, this segment of their users appear to be less likely to be active at all on the site; if they do use the site, they seem to provide the same amount of data as users who come to it through other routes.
 
 ### Logistic and Linear Regression
 #### Lasso to Pick Features
