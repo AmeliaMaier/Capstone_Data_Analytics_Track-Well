@@ -1,7 +1,7 @@
 # Trackwell
 ## Data Science Capstone Project
 
-My capstone is using data from the website Trackwell. This site was created to allow users to upload 'protocols' and 'hypothesis tests' for themselves and others to use with the hopes of attracting enough people and collecting enough data to allow for conclusions to be drawn on the 'protocols' or experiments being run. For now, Trackwell needs to know if it is possible to predict which users will provide the most data and/or when a user might stop using the service.
+My capstone is using data from the website Trackwell. This site was created to allow users to upload 'protocols' and 'hypothesis tests' for themselves and others to use with the hopes of croudsourcing data collection and allowing conclusions to be drawn on the 'protocols' or experiments being run. For now, Trackwell needs to know if it is possible to predict which users will provide the most data and/or when a user might stop using the service. Going forward, it will also be important to know how believable a given users entries are.
 
 ### Questions
 The original questions that the owner of Trackwell asked me were:
@@ -23,32 +23,33 @@ The questions I am answering in this section are:
     - If they will be involved, can we prodict how involved based on their profile data?
     - Based on past involvement or profile data, can we predict how long a user will remain active?
     - Based on past involvement or profile data, can we predict how long a user will go inactive?
+    
 ### Exploratory Data Analysis and Data Cleaning/Creation 
 There are no pre-defined site involvment levels, tracking of how long a user has been active/inactive or other metric tracking so those features will have to be created from existing data.
-- Total days active: (last date a user entered data on the site) - (the day the user signed up on the site)
-- Days since last activity: (day data was pulled) - (last date a user entered data on the site)
-- Estimated total data points: (number of unique, non-null data points associated with their profile data) + (number of followup entries)
-- User activity score: (Estimated total data points) / (Total days active)
-- User active yes/no: yes if user activity score is above 0
+- __days_active:__ (last date a user entered data on the site) - (the day the user signed up on the site)
+- __days_inactive:__ (day data was pulled) - (last date a user entered data on the site)
+- __user_data_cnt:__ (number of unique, non-null data points associated with their profile data) + (number of followup entries)
+- __user_activity_score:__ (user_data_cnt) / (days_active)
+- __user_active_yn:__ yes if user activity score is above 0
 
 There appears to have been a manual data load into the database at somepoint as there are some users with 0-1 Total days active but 2000 data points. In those cases, the first date with an entry assigned to it will take the place of theire sign up date. Profile data was also manipulated to determine if the data entered or the the fact that anything was entered was more important to predicting future activity. For features with a lot of nulls, I chose between assuming the median value for the field or dropping the feature on a per feature basis. I made the decision based on the likelihood of the median value being correct. For example, I dropped the raw blood type feature after determinning if it was answered or not because I have no way of knowing which blood type is correct but I assumed a null in married simply meant no because there weren't very many nulls for the feature and I assume a person is more likely to answer a question they feel pertains to them. I wanted to keep as many features early on as possible as I didn't know if bothering to answer the questions was actually more important than the final answer provided. For profile fields that were open text, I took a character count as the simplest way of summarizing the complexity of their input. Once I created a numeric represintative for the text fields, I dropped them from modeling.
 
-- usual_activity_len: the character count of the entry in the usual_activity field
-- dup_protocol_started: changed to a yes/no instead of actual protocol hashes
-- dup_protocol_finished: changed to a yes/no instead of actual protocol hashes
-- usual_medications_len: the character count of the entry in the usual_medications field
-- married_answered: changed to yes/no for if the queston was answered
-- menstruation_answered: changed to yes/no for if the queston was answered
-- bio_sex_answered: changed to yes/no for if the queston was answered
-- blood_type_answered: changed to yes/no for if the queston was answered
-- pregnant_answered: changed to yes/no for if the queston was answered
-- caffeine_answered: changed to yes/no for if the queston was answered
-- alcohol_answered: changed to yes/no for if the queston was answered
-- smoke_answered: changed to yes/no for if the queston was answered
-- usual_diet_len: the character count of the entry in the usual_diet field
-- usual_conditions_len: the character count of the entry in the usual_conditions field
-- dup_protocol_active: changed to a yes/no instead of actual protocol hashes
-- height_likelihood: the probability that the height reported exists in the adult population
+- __usual_activity_len:__ the character count of the entry in the usual_activity field
+- __dup_protocol_started:__ changed to a yes/no instead of actual protocol hashes
+- __dup_protocol_finished:__ changed to a yes/no instead of actual protocol hashes
+- __usual_medications_len:__ the character count of the entry in the usual_medications field
+- __married_answered:__ changed to yes/no for if the queston was answered
+- __menstruation_answered:__ changed to yes/no for if the queston was answered
+- __bio_sex_answered:__ changed to yes/no for if the queston was answered
+- __blood_type_answered:__ changed to yes/no for if the queston was answered
+- __pregnant_answered:__ changed to yes/no for if the queston was answered
+- __caffeine_answered:__ changed to yes/no for if the queston was answered
+- __alcohol_answered:__ changed to yes/no for if the queston was answered
+- __smoke_answered:__ changed to yes/no for if the queston was answered
+- __usual_diet_len:__ the character count of the entry in the usual_diet field
+- __usual_conditions_len:__ the character count of the entry in the usual_conditions field
+- __dup_protocol_active:__ changed to a yes/no instead of actual protocol hashes
+- __height_likelihood:__ the probability that the height reported exists in the adult population
   * This was determined with a very forgiving normal distribution based on the average of the mean heights for men and women and adding together the standard distribution for the two groups. It is not meant to predict if they were accurate but to simply show where heights provided were not feasible (40 cm for example).
   
 I later came back and dropped both dup_protocol_finished and dup_protocol_active because they were systematically set regardless of user interaction after a protocol was started. 
