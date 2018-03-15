@@ -391,3 +391,37 @@ avg / total       0.82      0.78      0.78       880
 ![](images/Roc_balanced.png)
 
 ![](images/Predicted_to_Actual.png)
+
+I then decided to check if the missing feature for how users found the site was the reason for the unpredicted results in my logistic model. To do this, I ran the balanced logistic regression on all the data that wasn't linked to a user that signed up in December:
+
+```
+Mean accuracy of logistic regression classifier on test set: 0.8290398126463701
+[[181  44]
+ [ 29 173]]
+tn, fp
+fn, tp
+
+    estimatedCoefficients               features      sort
+0                1.660179   dup_protocol_started  1.660179
+3                0.422823     usual_activity_len  0.422823
+5                0.276151       bio_sex_answered  0.276151
+9                0.272586         usual_diet_len  0.272586
+7                0.269947        menstruation_yn  0.269947
+1                0.221253            caffeine_yn  0.221253
+2                0.184799             married_yn  0.184799
+11               0.116015   usual_conditions_len  0.116015
+4                0.109095             alcohol_yn  0.109095
+10               0.076295  usual_medications_len  0.076295
+8               -0.018323    blood_type_answered  0.018323
+6                0.017111                bio_sex  0.017111
+Estimated intercept: [-0.31948655]
+With KFold cross validation
+10-fold cross validation average accuracy: 0.77
+10-fold cross validation average recall: 0.88
+10-fold cross validation average precision: 0.73
+             precision    recall  f1-score   support
+
+          0       0.86      0.80      0.83       225
+          1       0.80      0.86      0.83       202
+```
+Based on the results of removinng December, I believe the logistic model for weither or not a user will be active on the site will be improved by tracking how the user got to the site.
