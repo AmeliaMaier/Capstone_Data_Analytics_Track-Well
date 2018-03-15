@@ -128,7 +128,9 @@ __TTest Assumptions:__
 Running ttest on User Activity Scores for Dec vs all other months
 
 >>>Dec Average: 5.488265227289548
+
 >>>Year Average: 5.488265227289548
+
 >>>Ttest_indResult(statistic=0.0, pvalue=1.0)
 
 
