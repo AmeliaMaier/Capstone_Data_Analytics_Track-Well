@@ -95,7 +95,7 @@ And the thought that the blogger's push for January activity (people signing up 
 
  ![Activity Score By Signup Month](images/monthly_activity.png) 
 
-Signups By Month: ![Signups By Month](images/EDA_Signups_Per_Month-after_start_fix.png)
+![Signups By Month](images/EDA_Signups_Per_Month-after_start_fix.png)
 
 ## Hypothesis Test
 
