@@ -127,11 +127,11 @@ __TTest Assumptions:__
    
 Running ttest on User Activity Scores for Dec vs all other months
 
->>>Dec Average: 5.49
+>>>Dec Average: 2.87
 
 >>>Year Average: 5.49
 
->>>Ttest_indResult(statistic=0.0, pvalue=1.0)
+>>>Ttest_indResult(statistic=-9.37, pvalue=5.41e-20)
 
 
 Running ttest on Users Active YN for Dec vs all other months
@@ -140,7 +140,7 @@ Running ttest on Users Active YN for Dec vs all other months
 
 >>>Year Average without Dec: 0.50
 
->>>Ttest_indResult(statistic=-11.12, pvalue=3.61e-28)
+>>>Ttest_indResult(statistic=-10.66, pvalue=4.79e-26)
 
 __Conclusion:__ In metrics that have been normalized for total time on the system, there does appear to be a statisticaly significant difference in users who signed up in December and all other users as far as initial decisions to use or not use the site go. Unfortunantly for Track-well, this segment of their users appear to be less likely to be active at all on the site; if they do use the site, they seem to provide the same amount of data as users who come to it through other routes.
 
