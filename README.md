@@ -14,7 +14,7 @@ The questions I am answering in this section are:
 - Can we develop a score for user participation so I can rank users and find those who are most involved?
   * I am using assigning an activity score per user based on the number of data points they have provided and the number of days they have been active on the service.
 - Can we predict whether a user will be more or less involved in the future?
-  * Ultimatly, the final answer for this question will probably be a time series model. For now, I will see what I can do with logistic and linear modeling.
+  * Ultimatly, the final answer for this question will probably be a time series model. For now, I will see what I can do with logistic modeling.
   * I am starting with:
     - Can we predict if a user will be involved at all based on their profile data?
   * If I have time, I will also look at:
@@ -142,9 +142,9 @@ Running ttest on Users Active YN for Dec vs all other months
 
 >>>Ttest_indResult(statistic=-11.12, pvalue=3.61e-28)
 
-__Conclusion:__ In metrics that have been normalized for total time on the system, there does appear to be a statisticaly significant difference in users who signed up in December and all other users as far as initial decisions to use or not use the site go. Unfortunantly for Trackwell, this segment of their users appear to be less likely to be active at all on the site; if they do use the site, they seem to provide the same amount of data as users who come to it through other routes.
+__Conclusion:__ In metrics that have been normalized for total time on the system, there does appear to be a statisticaly significant difference in users who signed up in December and all other users as far as initial decisions to use or not use the site go. Unfortunantly for Track-well, this segment of their users appear to be less likely to be active at all on the site; if they do use the site, they seem to provide the same amount of data as users who come to it through other routes.
 
-### Logistic and Linear Regression
+### Logistic Regression
 #### Lasso to Pick Features
 
 User Active YN Coefficients: ![User Active YN Coefficients](images/lasso_user_active_yn.png)
@@ -424,4 +424,4 @@ With KFold cross validation
           0       0.86      0.80      0.83       225
           1       0.80      0.86      0.83       202
 ```
-Based on the results of removinng December, I believe the logistic model for weither or not a user will be active on the site will be improved by tracking how the user got to the site.
+Based on the results of removing December, I believe the logistic model for whether or not a user will be active on the site will be improved by tracking how the user heard about the site.
