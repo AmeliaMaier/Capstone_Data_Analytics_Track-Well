@@ -56,7 +56,6 @@ def logistic_regression(df):
     coef_list['sort'] = coef_list.estimatedCoefficients.abs()
     print(coef_list.sort_values(by='sort', ascending=False))
     print(f'Estimated intercept: {logreg.intercept_}')
-    print_roc_curve(y_test, logreg, X_test)
 
     print("With KFold cross validation")
     kfold = model_selection.KFold(n_splits=10, random_state=7)
@@ -72,7 +71,12 @@ def logistic_regression(df):
     print(f"10-fold cross validation average precision: {results.mean():.2f}")
     print(classification_report(y_test, y_pred))
 
-    print_roc_curve(y_test, logreg, X_test)
+    print_roc_curve(y_test, logreg, X_test, 'Standard Logistic')
+    plt.scatter(logreg.predict_proba(X_test)[:,1], y_pred)
+    plt.title("Active YN Probability\nStandard Logistic")
+    plt.xlabel('Predicted Probability')
+    plt.ylabel('Actual Probability')
+    plt.show()
 
 
 def logistic_balanced(df):
@@ -102,7 +106,6 @@ def logistic_balanced(df):
     coef_list['sort'] = coef_list.estimatedCoefficients.abs()
     print(coef_list.sort_values(by='sort', ascending=False))
     print(f'Estimated intercept: {logreg.intercept_}')
-    print_roc_curve(y_test, logreg, X_test)
 
     print("With KFold cross validation")
     kfold = model_selection.KFold(n_splits=10, random_state=7)
@@ -118,9 +121,14 @@ def logistic_balanced(df):
     print(f"10-fold cross validation average precision: {results.mean():.2f}")
     print(classification_report(y_test, y_pred))
 
-    print_roc_curve(y_test, logreg, X_test)
+    print_roc_curve(y_test, logreg, X_test, 'Balanced without December')
+    plt.scatter(logreg.predict_proba(X_test)[:,1], y_pred)
+    plt.title("Active YN Probability\nBalanced without December")
+    plt.xlabel('Predicted Probability')
+    plt.ylabel('Actual Probability')
+    plt.show()
 
-def print_roc_curve(y_test, logreg, X_test):
+def print_roc_curve(y_test, logreg, X_test, title):
     logit_roc_auc = roc_auc_score(y_test, logreg.predict(X_test))
     fpr, tpr, thresholds = roc_curve(y_test, logreg.predict_proba(X_test)[:,1])
     plt.figure()
@@ -130,9 +138,9 @@ def print_roc_curve(y_test, logreg, X_test):
     plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic')
+    plt.title(f'ROC\n{title}')
     plt.legend(loc="lower right")
-    plt.savefig('Log_ROC')
+    #plt.savefig('Log_ROC')
     plt.show()
 
 def linear_regression(df):
@@ -760,7 +768,7 @@ user_profile_df['estimated_created_date'] = user_profile_df['estimated_created_d
 
 #dec_vs_other_months(user_profile_df[['user_id','user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']])
 
-lasso_attempt(user_profile_df.drop(['user_id','estimated_created_date'],axis=1))
+#lasso_attempt(user_profile_df.drop(['user_id','estimated_created_date'],axis=1))
 
 
 # plt.hist(user_profile_df['user_active_yn'] )
@@ -768,8 +776,8 @@ lasso_attempt(user_profile_df.drop(['user_id','estimated_created_date'],axis=1))
 # plt.show()
 
 
-#logistic_regression(user_profile_df)
-#logistic_balanced(user_profile_df)
+logistic_regression(user_profile_df)
+logistic_balanced(user_profile_df.loc[user_profile_df['estimated_created_date'].dt.month < 12])
 #linear_regression(user_profile_df.loc[user_profile_df['user_active_yn']==1])
 
 #dec_vs_other_months(user_profile_df[['user_id','user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']])
