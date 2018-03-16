@@ -77,6 +77,8 @@ def logistic_regression(df):
     plt.xlabel('Predicted Probability')
     plt.ylabel('Actual Probability')
     plt.show()
+    cost_benefit = [[100,-10],[0,0]]
+    plot_profit_curve(logreg, cost_benefit, X_train, X_test, y_train, y_test)
 
 
 def logistic_balanced(df):
@@ -127,6 +129,8 @@ def logistic_balanced(df):
     plt.xlabel('Predicted Probability')
     plt.ylabel('Actual Probability')
     plt.show()
+    cost_benefit = [[100,-10],[0,0]]
+    plot_profit_curve(logreg, cost_benefit, X_train, X_test, y_train, y_test)
 
 def print_roc_curve(y_test, logreg, X_test, title):
     logit_roc_auc = roc_auc_score(y_test, logreg.predict(X_test))
@@ -742,6 +746,39 @@ def create_user_profile():
     user_profile_df.drop('height_cm', axis=1, inplace=True)
     return user_profile_df
 
+def standard_confusion_matrix(y_true, y_predict):
+    y_true = np.array(y_true)
+    y_predict = np.array(y_predict)
+    true_positives = np.sum(np.logical_and(y_predict==1,y_true==1))
+    false_positives = np.sum(np.logical_and(y_predict==1,y_true==0))
+    false_negatives = np.sum(np.logical_and(y_predict==0,y_true==1))
+    true_negatives = np.sum(np.logical_and(y_predict==0,y_true==0))
+    confusion_matrix = np.array([[true_positives,false_positives],[false_negatives,true_negatives]])
+    return confusion_matrix
+
+# print(standard_confusion_matrix([1, 1, 1, 1, 1, 0, 0], [1, 1, 1, 1, 0, 0, 0]))
+
+def profit_curve(cost_benefit, predicted_probs, y_true):
+    thresholds = np.sort(predicted_probs)
+    thresholds = np.append(thresholds, [1.0])
+    expected_profits = []
+    for threshold in thresholds:
+        confusion_matrix = standard_confusion_matrix(y_true, predicted_probs >= threshold)
+        expected_profits.append(np.sum(confusion_matrix * cost_benefit)/np.sum(confusion_matrix))
+    return np.array([thresholds, expected_profits])
+
+def plot_profit_curve(model, cost_benefit, X_train, X_test, y_train, y_test):
+    model.fit(X_train, y_train)
+    predicted_probs = model.predict_proba(X_test)
+    profits = profit_curve(cost_benefit, predicted_probs[:,1], y_test)
+    percentages = profits[0]
+    profits = profits[1]
+    plt.plot(percentages, profits, label='profit')
+    plt.title("Profit Curve")
+    plt.xlabel("Percentage of test instances (decreasing by score)")
+    plt.ylabel("Profit")
+    plt.legend(loc='best')
+    plt.show()
 
 #user_profile_df = create_user_profile()
 '''
