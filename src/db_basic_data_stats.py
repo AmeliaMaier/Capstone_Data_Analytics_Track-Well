@@ -469,16 +469,16 @@ def get_estimated_created_date(main_df):
     main_df = main_df.merge(estimated_created_date_df, how='left', on='user_id')
     return main_df
 
-def corr_heatmap_with_values(df):
+def corr_heatmap_with_values(df, title):
     corr = df.corr()
     mask = np.zeros_like(corr, dtype=np.bool)
     mask[np.triu_indices_from(mask)] = True
-    f, ax = plt.subplots(figsize=(17,15))
+    f, ax = plt.subplots(figsize=(10,10))
     cmap = sns.color_palette('coolwarm')
     sns.heatmap(corr, mask=mask, cmap=cmap, center=0, square=True, linewidths=.5,
                 yticklabels=True, annot=True, fmt='.2f', cbar_kws={'shrink':.5})
-    plt.title('Correlation Matrix', fontsize=20)
-    plt.xticks(rotation=90, fontsize=11)
+    plt.title(title, fontsize=20)
+    plt.xticks(rotation=60, fontsize=11, horizontalalignment='right')
     plt.yticks(rotation=0, fontsize=11)
     plt.tight_layout()
     plt.show()
@@ -487,33 +487,36 @@ def dec_vs_other_months(hypothesis_df):
     #hypothesis_df['estimated_created_date'] = hypothesis_df['estimated_created_date'].astype('datetime64[ns]')
     hypothesis_df_Dec = hypothesis_df.loc[hypothesis_df['estimated_created_date'].dt.month == 12]
     hypothesis_df_not_Dec = hypothesis_df.loc[hypothesis_df['estimated_created_date'].dt.month < 12]
-    dec_active = hypothesis_df_not_Dec.loc[hypothesis_df_not_Dec['user_active_yn']==1]
+    dec_active = hypothesis_df_Dec.loc[hypothesis_df_Dec['user_active_yn']==1]
     other_active = hypothesis_df_not_Dec.loc[hypothesis_df_not_Dec['user_active_yn']==1]
-    # plt.hist(hypothesis_df_Dec['user_activity_score'], color='cyan', label='Dec Active Scores')
-    # plt.hist(hypothesis_df_not_Dec['user_activity_score'],alpha=0.7, color='pink', label='Year Active Scores')
-    # plt.ylabel('number of users')
-    # plt.xlabel('count per variable')
+
+
+    # plt.hist([dec_active['user_activity_score'],other_active['user_activity_score']], 10, histtype='bar', color=['blue','green'], label=['December','All Other Months'])
+    # plt.ylabel('User Count')
+    # plt.xlabel('User Activity Score')
+    # plt.title('User Activity Scores\nDecember vs All Other Months')
     # plt.legend()
     # plt.show()
     #
-    # plt.hist(hypothesis_df_Dec['user_active_yn'], color='cyan', label='Dec Active YN')
-    # plt.hist(hypothesis_df_not_Dec['user_active_yn'],alpha=0.7, color='pink', label='Year Active YN')
-    # plt.ylabel('number of users')
-    # plt.xlabel('count per variable')
+    # plt.hist([hypothesis_df_Dec['user_active_yn'],hypothesis_df_not_Dec['user_active_yn']], 10, histtype='bar', color=['blue','green'], label=['December','All Other Months'])
+    # plt.ylabel('User Count')
+    # plt.xlabel('User Active YN')
+    # plt.title('User Active YN\nDecember vs All Other Months')
     # plt.legend()
     # plt.show()
 
-    bootstrap_ci(dec_active['user_activity_score'], 'Dec User Activity Score')
-    bootstrap_ci(other_active['user_activity_score'], 'Not Dec User Activity Score')
-    bootstrap_ci(hypothesis_df_Dec['user_active_yn'], 'Dec User Active YN')
-    bootstrap_ci(hypothesis_df_not_Dec['user_active_yn'], 'Not Dec User Active YN')
+
+    bootstrap_ci(dec_active['user_activity_score'], 'December User Activity Score')
+    bootstrap_ci(other_active['user_activity_score'], 'All Other Months User Activity Score')
+    bootstrap_ci(hypothesis_df_Dec['user_active_yn'], 'December User Active YN')
+    bootstrap_ci(hypothesis_df_not_Dec['user_active_yn'], 'All Other Months User Active YN')
 
     #dec sample for H on user_active_score
     print("Running ttest on user_active score for Dec vs all other months")
     print(f"Dec Average: {dec_active['user_activity_score'].mean():.2f}")
     print(f'Other Average: {other_active["user_activity_score"].mean():.2f}')
-    hypothesis_df_Dec_sample = dec_active.sample(len(other_active.index))
-    user_active_score_ttest = stats.ttest_ind(hypothesis_df_Dec_sample['user_activity_score'], other_active['user_activity_score'])
+    other_sample = other_active.sample(len(dec_active.index))
+    user_active_score_ttest = stats.ttest_ind(dec_active['user_activity_score'], other_sample['user_activity_score'])
     print(user_active_score_ttest)
     #Ttest_indResult(statistic=-5.9016620625301828, pvalue=4.0248341180765505e-09)
 
@@ -539,7 +542,7 @@ def dec_vs_other_months(hypothesis_df):
     Ttest_indResult(statistic=-10.82884489661955, pvalue=8.3293441015901507e-27)
 
     '''
-def lasso_fit_and_print(target_name, model, predictor, target, predvar_columns):
+def lasso_fit_and_print(target_name, predictor, target, predvar_columns):
     pred_train, pred_test, tar_train, tar_test = train_test_split(predictor, target,test_size=.3)
     model=LassoLarsCV(cv=10, precompute=False).fit(pred_train,tar_train)
     m_log_alphas = -np.log10(model.alphas_)
@@ -579,15 +582,15 @@ def lasso_attempt(data_clean):
     lasso_fit_and_print("Days Inactive", predictors_active, target5, predvar_active.columns)
 
 def correlation_maps_lasso(user_profile):
-    corr_heatmap_with_values(user_profile[['user_active_yn','dup_protocol_started','caffeine_yn','dup_protocol_finished', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']])
+    corr_heatmap_with_values(user_profile[['user_active_yn','dup_protocol_started','caffeine_yn','dup_protocol_finished', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']], "User Active YN\nLasso Based Correlation Heat Map")
 
-    corr_heatmap_with_values(user_profile[['user_activity_score', 'dup_protocol_started','dup_protocol_finished', 'usual_activity_len', 'alcohol_yn', 'menstruation_yn', 'usual_medications_len', 'usual_conditions_len','caffeine_yn','bio_sex', 'smoke_yn', 'pregnant_yn']])
+    corr_heatmap_with_values(user_profile[['user_activity_score', 'dup_protocol_started','dup_protocol_finished', 'usual_activity_len', 'alcohol_yn', 'menstruation_yn', 'usual_medications_len', 'usual_conditions_len','caffeine_yn','bio_sex', 'smoke_yn', 'pregnant_yn']], 'User Activity Score\nLasso Based Correlation Heat Map')
 
-    corr_heatmap_with_values(user_profile[['user_activity_cnt', 'usual_activity_len','pregnant_answered', 'caffeine_yn', 'usual_diet_len', 'smoke_answered', 'pregnant_yn', 'dup_protocol_started','usual_medications_len','usual_conditions_len', 'alcohol_yn', 'bio_sex']])
+    corr_heatmap_with_values(user_profile[['user_activity_cnt', 'usual_activity_len','pregnant_answered', 'caffeine_yn', 'usual_diet_len', 'smoke_answered', 'pregnant_yn', 'dup_protocol_started','usual_medications_len','usual_conditions_len', 'alcohol_yn', 'bio_sex']], 'User Activity Count\nLasso Based Correlation Heat Map')
 
-    corr_heatmap_with_values(user_profile[['days_active', 'pregnant_answered','caffeine_yn', 'alcohol_answered', 'married_answered', 'menstruation_answered', 'usual_diet_len', 'caffeine_answered','usual_activity_len','blood_type_answered', 'married_yn', 'dup_protocol_started',]])
+    corr_heatmap_with_values(user_profile[['days_active', 'pregnant_answered','caffeine_yn', 'alcohol_answered', 'married_answered', 'menstruation_answered', 'usual_diet_len', 'caffeine_answered','usual_activity_len','blood_type_answered', 'married_yn', 'dup_protocol_started',]], 'Days Active\nLasso Based Correlation Heat Map')
 
-    corr_heatmap_with_values(user_profile[['days_inactive', 'height_likelihood','blood_type_answered', 'caffeine_yn', 'dup_protocol_started', 'pregnant_yn', 'smoke_yn', 'dup_protocol_active','smoke_answered','menstruation_yn', 'dup_protocol_finished', 'bio_sex_answered']])
+    corr_heatmap_with_values(user_profile[['days_inactive', 'height_likelihood','blood_type_answered', 'caffeine_yn', 'dup_protocol_started', 'pregnant_yn', 'smoke_yn', 'dup_protocol_active','smoke_answered','menstruation_yn', 'dup_protocol_finished', 'bio_sex_answered']], 'Days Inactive\nLasso Based Correlation Heat Map')
 
 def add_months(user_profile_df):
     user_profile_df['month_created'] = user_profile_df['created_date'].dt.month.astype(int)
@@ -629,7 +632,7 @@ def plot_histogram_with_normal(data, name):
     ax.hist(data, normed=True)
     normal = stats.norm.pdf(x_range, data.mean(), data.std())
     normal_line =ax.plot(x_range, normal, label='normal pmf', color='r')
-    ax.set_title(f"\nmean:{data.mean():.2f} std:{data.std():.2f}\nKS Test P value:{stats.kstest(data, 'norm',args=[data.mean(), data.std()])[1]:.2f}")
+    ax.set_title(f"{name}\nmean:{data.mean():.2f} std:{data.std():.2f}\nKS Test P value:{stats.kstest(data, 'norm',args=[data.mean(), data.std()])[1]:.2f}")
     ax.set_xlabel(name)
     plt.show()
 
@@ -740,10 +743,25 @@ dec_vs_other_months(hypothesis_df)
 '''
 lasso_attempt(user_profile_df.drop(['user_id','estimated_created_date'],axis=1))
 '''
-#correlation_maps_lasso(user_profile_df)
 #df_to_csv(user_profile_df, 'user_profile.csv')
 user_profile_df = csv_to_df('user_profile.csv')
 user_profile_df['estimated_created_date'] = user_profile_df['estimated_created_date'].astype('datetime64[ns]')
+
+#corr_heatmap_with_values(user_profile_df, "User Profile Features\nCorrelation Heat Map")
+#correlation_maps_lasso(user_profile_df)
+
+# month_year_active = user_profile_df[['user_id', 'estimated_created_date', 'days_active', 'days_inactive', 'user_activity_score']]
+# month_year_active['Profile Creation Month'] = month_year_active['estimated_created_date'].dt.month.astype(int) + (month_year_active['estimated_created_date'].dt.year.astype(int) - 2017)*12
+# plt.hist(month_year_active['Profile Creation Month'])
+# plt.ylabel('Total Number of Users')
+# plt.xlabel('Profile Creation Month')
+# plt.title('User Count Per Signup Month')
+# plt.show()
+
+#dec_vs_other_months(user_profile_df[['user_id','user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']])
+
+lasso_attempt(user_profile_df.drop(['user_id','estimated_created_date'],axis=1))
+
 
 # plt.hist(user_profile_df['user_active_yn'] )
 # plt.xlabel("Users Active YN")
@@ -751,9 +769,7 @@ user_profile_df['estimated_created_date'] = user_profile_df['estimated_created_d
 
 
 #logistic_regression(user_profile_df)
-print('without dec')
-without_dec = user_profile_df.loc[user_profile_df['estimated_created_date'].dt.month < 12]
-logistic_balanced(without_dec)
+#logistic_balanced(user_profile_df)
 #linear_regression(user_profile_df.loc[user_profile_df['user_active_yn']==1])
 
 #dec_vs_other_months(user_profile_df[['user_id','user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']])
