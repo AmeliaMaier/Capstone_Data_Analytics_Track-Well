@@ -285,38 +285,7 @@ User Days Inactive Coefficients: ![User Days Inactive Coefficients](images/lasso
 21      0.000000  menstruation_answered   0.000000
 ```
 ### Logistic Regression on User Active YN
-I started by standardizing and using all the predictors selected from my Lasso Regression in a basic Logistic Regression model. I am using the API from Statsmodels to help evaluate results:
-```python
-           Current function value: 0.457499
-         Iterations 7
-                           Logit Regression Results                           
-==============================================================================
-Dep. Variable:         user_active_yn   No. Observations:                 2933
-Model:                          Logit   Df Residuals:                     2921
-Method:                           MLE   Df Model:                           11
-Date:                Thu, 15 Mar 2018   Pseudo R-squ.:                  0.3213
-Time:                        14:02:14   Log-Likelihood:                -1341.8
-converged:                       True   LL-Null:                       -1977.1
-                                        LLR p-value:                1.062e-265
-==============================================================================
-                 coef    std err          z      P>|z|      [0.025      0.975]
-------------------------------------------------------------------------------
-x1             1.1351      0.051     22.392      0.000       1.036       1.235
-x2             0.2093      0.075      2.801      0.005       0.063       0.356
-x3             0.1291      0.064      2.021      0.043       0.004       0.254
-x4             0.2876      0.099      2.907      0.004       0.094       0.481
-x5             0.0387      0.067      0.578      0.563      -0.092       0.170
-x6             0.1778      0.074      2.412      0.016       0.033       0.322
-x7             0.0210      0.077      0.274      0.784      -0.130       0.172
-x8             0.1839      0.067      2.736      0.006       0.052       0.316
-x9             0.1571      0.061      2.595      0.009       0.038       0.276
-x10            0.2875      0.118      2.428      0.015       0.055       0.520
-x11            0.4187      0.144      2.904      0.004       0.136       0.701
-x12           -0.0589      0.077     -0.760      0.447      -0.211       0.093
-==============================================================================
-```
-
-With just a train/test split on the Logistic Regression I got:
+I with my standardized data and using all the predictors selected from my Lasso Regression in a basic Logistic Regression model. With just a train/test split on the Logistic Regression I got:
 ```
 Mean accuracy of logistic regression classifier on test set: 0.78
                                    [[357 163]
@@ -353,6 +322,10 @@ avg / total       0.82      0.78      0.78       880
 
 ```
 ![](images/ROC_1.png)
+
+The profit curve based on TP = 100, FP = -10 and no cost for FN or TN is shown below. This cost matrix was created after speaking with the owner of Track-well and determining that he would use this model to identify users worth advertising to and focusing support on. The current values are estimates and not officiall from Track-well at this time.
+
+![](images/profit_curve_basic_logistic.png)
 
 The results from a basic logistic regression surprised me. The model is consistently 1 bias when the data is actually 0 bias.
 
@@ -429,5 +402,9 @@ avg / total       0.83      0.83      0.83       427
 ```
 ![](images/Roc_balanced_noDec.png)
 ![](images/predicted_to_actual_no_december.png)
+
+With the same cost matrix as before, I now get:
+
+![](images/profit_curve_balanced_without_dec.png)
 
 Based on the results of removing December, I believe the logistic model for whether or not a user will be active on the site will be improved by tracking how the user heard about the site.
