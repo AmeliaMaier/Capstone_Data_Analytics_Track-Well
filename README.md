@@ -70,30 +70,30 @@ Features that will probably be useful in the future but haven't been created yet
   
 Because these features are based on existing features, there are likely to be highly correlated sets in the full feature map. I intend to pick only some of the features, avoiding correlated groups, for the final models. For most of my analysis, I was looking at 2933 unique users with about 30 features.
 
-Correlation Heatmap: ![Alt](images/profile_corr_map.png) 
+![Alt](images/profile_corr_map.png) 
 
 I later came back to check correlations specifically in the features suggested by my lasso regression models:
 
-Correlations For User Active YN: ![](images/correlations_user_active_yn.png)
+![](images/correlations_user_active_yn.png)
 
-Correlations For User Active Score: ![](images/correlations_user_active_score.png)
+![](images/correlations_user_active_score.png)
 
-Correlations For User Active Count: ![](images/correlations_user_active_cnt.png)
+![](images/correlations_user_active_cnt.png)
 
-Correlations For Days Active: ![](images/correlations_days_active.png)
+![](images/correlations_days_active.png)
 
-Correlations For Days Inactive: ![](images/correlations_days_inactive.png)
+![](images/correlations_days_inactive.png)
 
 
 After going back and fixing for the dataload, the timebased correlations became more obviouse:
 
-Total Number of Days Active By Signup Month: ![Total Number of Days Active By Signup Month](images/monthly_days_active.png) 
+![Total Number of Days Active By Signup Month](images/monthly_days_active.png) 
 
-Days Since Last Activity By Signup Month: ![Days Since Last Activity By Signup Month](images/monthly_days_inactive.png) 
+![Days Since Last Activity By Signup Month](images/monthly_days_inactive.png) 
 
 And the thought that the blogger's push for January activity (people signing up in December to start in January) was helpful in increasinng the percentage of involvement becomes less likely, though it does seem to have pushed a higher volume of people to the site:
 
-Activity Score By Signup Month: ![Activity Score By Signup Month](images/monthly_activity.png) 
+ ![Activity Score By Signup Month](images/monthly_activity.png) 
 
 Signups By Month: ![Signups By Month](images/EDA_Signups_Per_Month-after_start_fix.png)
 
@@ -119,10 +119,7 @@ __TTest Assumptions:__
   
   ![](images/Bootstrapped_Dec_avg_ActiveYN.png)  ![](images/Bootstrapped_Other_avg_ActiveYN.png)
   
-  __Activity Scores Before Removing Inactive Users:__
-  ![](images/Bootstrapped_Dec_avg_Activity_score_original.png)  ![](images/Bootstrapped_Other_avg_Activity_score_original.png)
-  
-  __Activity Scores After Removing Inactive Users:__
+
    ![](images/Bootstrapped_Dec_avg_Activity_score.png)  ![](images/Bootstrapped_Other_avg_Activity_score.png)
    
 Running ttest on User Activity Scores for Dec vs all other months
@@ -142,12 +139,14 @@ Running ttest on Users Active YN for Dec vs all other months
 
 >>>Ttest_indResult(statistic=-10.66, pvalue=4.79e-26)
 
-__Conclusion:__ In metrics that have been normalized for total time on the system, there does appear to be a statisticaly significant difference in users who signed up in December and all other users as far as initial decisions to use or not use the site go. Unfortunantly for Track-well, this segment of their users appear to be less likely to be active at all on the site; if they do use the site, they seem to provide the same amount of data as users who come to it through other routes.
+__Conclusion:__ In metrics that have been normalized for total time on the system, there does appear to be a statisticaly significant difference in users who signed up in December and all other users as far as initial decisions to use or not use the site go. There is also a statistically significant difference in how active the users are if they decided to user the system after signing up. Unfortunantly, this segment of users appear to be less likely to be active at all and less likely to upload a large amount of data. 
 
 ### Logistic Regression
 #### Lasso to Pick Features
 
-User Active YN Coefficients: ![User Active YN Coefficients](images/lasso_user_active_yn.png)
+I am using a Lasso Regression model on my standardized data to assist in picking which features I should include in my final model. Features with a 0 coefficient in this test will have practically no value in my models.
+
+![User Active YN Coefficients](images/lasso_user_active_yn.png)
 ```python
 coefficients             predictors      sort
 3       0.199714   dup_protocol_started  0.199714
@@ -174,7 +173,10 @@ coefficients             predictors      sort
 2       0.000000    dup_protocol_active  0.000000
 22      0.000000      height_likelihood  0.000000
 ```
-User Activity Score Coefficients: ![User Activity Score Coefficients](images/lasso_user_activity_score.png)
+
+Out of curiosity, I went ahead and did the Lasso Regression on the other activity metrics I created. I will be creating predictive models for them over time.
+
+![User Activity Score Coefficients](images/lasso_user_activity_score.png)
 ```python
     coefficients             predictors      sort
 3       0.434011   dup_protocol_started  0.434011
@@ -201,7 +203,7 @@ User Activity Score Coefficients: ![User Activity Score Coefficients](images/las
 21      0.000000  menstruation_answered  0.000000
 22      0.000000      height_likelihood  0.000000
 ```
-User Activity Count Coefficients: ![User Activity Count Coefficients](images/lasso_user_activity_count.png)
+![User Activity Count Coefficients](images/lasso_user_activity_count.png)
 ```python
     coefficients             predictors       sort
 13     35.409223     usual_activity_len  35.409223
@@ -283,7 +285,7 @@ User Days Inactive Coefficients: ![User Days Inactive Coefficients](images/lasso
 21      0.000000  menstruation_answered   0.000000
 ```
 ### Logistic Regression on User Active YN
-I started by standardizing and using all the predictors selected by Lasso in a basic Logistic model and seeing how it did. I am using the API from Statsmodels to help evaluate results:
+I started by standardizing and using all the predictors selected from my Lasso Regression in a basic Logistic Regression model. I am using the API from Statsmodels to help evaluate results:
 ```python
            Current function value: 0.457499
          Iterations 7
@@ -314,7 +316,7 @@ x12           -0.0589      0.077     -0.760      0.447      -0.211       0.093
 ==============================================================================
 ```
 
-With just a train/test split on the logistic regression I got:
+With just a train/test split on the Logistic Regression I got:
 ```
 Mean accuracy of logistic regression classifier on test set: 0.78
                                    [[357 163]
@@ -392,7 +394,7 @@ avg / total       0.82      0.78      0.78       880
 
 ![](images/Predicted_to_Actual.png)
 
-I then decided to check if the missing feature for how users found the site was the reason for the unpredicted results in my logistic model. To do this, I ran the balanced logistic regression on all the data that wasn't linked to a user that signed up in December:
+I then decided to check if the missing feature for how users found the site was the reason for the unexpected results in my Logistic model. To do this, I ran the balanced Logistic Regression on all the data that wasn't linked to a user that signed up in December:
 
 ```
 Mean accuracy of logistic regression classifier on test set: 0.8290398126463701
@@ -420,8 +422,12 @@ With KFold cross validation
 10-fold cross validation average recall: 0.88
 10-fold cross validation average precision: 0.73
              precision    recall  f1-score   support
-
           0       0.86      0.80      0.83       225
           1       0.80      0.86      0.83       202
+avg / total       0.83      0.83      0.83       427
+
 ```
+![](images/Roc_balanced_noDec.png)
+![](images/predicted_to_actual_no_december.png)
+
 Based on the results of removing December, I believe the logistic model for whether or not a user will be active on the site will be improved by tracking how the user heard about the site.
