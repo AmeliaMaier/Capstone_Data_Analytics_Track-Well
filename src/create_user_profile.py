@@ -4,6 +4,10 @@ file creates the csv for the user_profile_df. Should only be run once for each d
 '''
 import pandas as pd
 
+psql_user = os.environ.get('PSQL_USER')
+psql_password = os.environ.get('PSQL_PASSWORD')
+psql_db_name = os.environ.get('PSQL_TRACKWELL')
+
 def drop_empty_columns(df):
     '''
     Input: a dataframe to clean
