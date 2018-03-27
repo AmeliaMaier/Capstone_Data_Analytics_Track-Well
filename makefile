@@ -1,3 +1,3 @@
 .PHONY: test_trackwell
 test_trackwell:
-	py.test test/trackwell.py
+	py.test test/test_trackwell.py

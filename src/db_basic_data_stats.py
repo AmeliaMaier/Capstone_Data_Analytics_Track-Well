@@ -29,124 +29,6 @@ psql_password = os.environ.get('PSQL_PASSWORD')
 
 #tables = ["preset", "preset_array", "protocol", "protocol_array", "reminder", "scale_option", "statistic", "map_protocol_day_entry", "user_table", "entry", "comment"]
 
-def logistic_regression(df):
-    logreg = LogisticRegression()
-    columns = ['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']
-    #X=df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']]
-    #X=df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'bio_sex_answered', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len']]
-    #X=stand(df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'bio_sex_answered', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len']])
-    X=stand(df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']])
-
-    y=df['user_active_yn']
-    logit_model=sm.Logit(y,X)
-    result=logit_model.fit()
-    print(result.summary())
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
-    logreg = LogisticRegression()
-    logreg.fit(X_train, y_train)
-    y_pred = logreg.predict(X_test)
-    print("With train test fix")
-    print(f'Mean accuracy of logistic regression classifier on test set: {logreg.score(X_test, y_test)}')
-    print(confusion_matrix(y_test, y_pred))
-    print("tn, fp\nfn, tp")
-    print('\n\n')
-
-    coef_list = pd.DataFrame(data = {'features':columns, 'estimatedCoefficients':logreg.coef_.ravel()})
-    coef_list['sort'] = coef_list.estimatedCoefficients.abs()
-    print(coef_list.sort_values(by='sort', ascending=False))
-    print(f'Estimated intercept: {logreg.intercept_}')
-
-    print("With KFold cross validation")
-    kfold = model_selection.KFold(n_splits=10, random_state=7)
-    modelCV = LogisticRegression()
-    scoring = 'accuracy'
-    results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f"10-fold cross validation average accuracy: {results.mean():.2f}")
-    scoring = 'recall'
-    results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f"10-fold cross validation average recall: {results.mean():.2f}")
-    scoring = 'precision'
-    results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f"10-fold cross validation average precision: {results.mean():.2f}")
-    print(classification_report(y_test, y_pred))
-
-    print_roc_curve(y_test, logreg, X_test, 'Standard Logistic')
-    plt.scatter(logreg.predict_proba(X_test)[:,1], y_pred)
-    plt.title("Active YN Probability\nStandard Logistic")
-    plt.xlabel('Predicted Probability')
-    plt.ylabel('Actual Probability')
-    plt.show()
-    cost_benefit = [[100,-10],[0,0]]
-    plot_profit_curve(logreg, cost_benefit, X_train, X_test, y_train, y_test)
-
-
-def logistic_balanced(df):
-    logreg = LogisticRegression()
-    columns = ['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']
-    #X=df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']]
-    #X=df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'bio_sex_answered', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len']]
-    #X=stand(df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'bio_sex_answered', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len']])
-    X=stand(df[['dup_protocol_started','caffeine_yn', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']])
-    y=df['user_active_yn']
-
-    # logit_model=sm.Logit(y,X)
-    # result=logit_model.fit()
-    # print(result.summary())
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
-    logreg = LogisticRegression(class_weight='balanced')
-    logreg.fit(X_train, y_train)
-    y_pred = logreg.predict(X_test)
-    print("With train test fix")
-    print(f'Mean accuracy of logistic regression classifier on test set: {logreg.score(X_test, y_test)}')
-    print(confusion_matrix(y_test, y_pred))
-    print("tn, fp\nfn, tp")
-    print('\n\n')
-
-    coef_list = pd.DataFrame(data = {'features':columns, 'estimatedCoefficients':logreg.coef_.ravel()})
-    coef_list['sort'] = coef_list.estimatedCoefficients.abs()
-    print(coef_list.sort_values(by='sort', ascending=False))
-    print(f'Estimated intercept: {logreg.intercept_}')
-
-    print("With KFold cross validation")
-    kfold = model_selection.KFold(n_splits=10, random_state=7)
-    modelCV = LogisticRegression()
-    scoring = 'accuracy'
-    results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f"10-fold cross validation average accuracy: {results.mean():.2f}")
-    scoring = 'recall'
-    results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f"10-fold cross validation average recall: {results.mean():.2f}")
-    scoring = 'precision'
-    results = model_selection.cross_val_score(modelCV, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f"10-fold cross validation average precision: {results.mean():.2f}")
-    print(classification_report(y_test, y_pred))
-
-    print_roc_curve(y_test, logreg, X_test, 'Balanced without December')
-    plt.scatter(logreg.predict_proba(X_test)[:,1], y_pred)
-    plt.title("Active YN Probability\nBalanced without December")
-    plt.xlabel('Predicted Probability')
-    plt.ylabel('Actual Probability')
-    plt.show()
-    cost_benefit = [[100,-10],[0,0]]
-    plot_profit_curve(logreg, cost_benefit, X_train, X_test, y_train, y_test)
-
-def print_roc_curve(y_test, logreg, X_test, title):
-    logit_roc_auc = roc_auc_score(y_test, logreg.predict(X_test))
-    fpr, tpr, thresholds = roc_curve(y_test, logreg.predict_proba(X_test)[:,1])
-    plt.figure()
-    plt.plot(fpr, tpr, label='Logistic Regression (area = %0.2f)' % logit_roc_auc)
-    plt.plot([0, 1], [0, 1],'r--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title(f'ROC\n{title}')
-    plt.legend(loc="lower right")
-    #plt.savefig('Log_ROC')
-    plt.show()
-
 def linear_regression(df):
     columns = ['dup_protocol_started', 'usual_activity_len', 'usual_medications_len','caffeine_yn','bio_sex', 'smoke_yn', 'pregnant_yn']
     #X = df[['dup_protocol_started','dup_protocol_finished', 'usual_activity_len', 'alcohol_yn', 'menstruation_yn', 'usual_medications_len', 'usual_conditions_len','caffeine_yn','bio_sex', 'smoke_yn', 'pregnant_yn']]
@@ -315,171 +197,74 @@ def linear_regression(df):
     Estimated intercept: 4.4603242419024856
     '''
 
-def stand(df):
-    scaler = StandardScaler()
-    scaler.fit(df)
-    return scaler.transform(df)
 
-def query_to_dataframe(query_string):
-    engine = create_engine(f'postgresql+psycopg2://{psql_user}:{psql_password}@localhost:5432/matt',echo=False)
-    table_df=pd.read_sql_query(query_string,con=engine)
-    return table_df
 
-def signup_rate_hist_monthly():
-    #limit by date because the user table was pulled down a few days after all the others and has some extra users in it (people who signed up between 3/3/18 and the second pull
-    user_signup_hist_query = """
-    SELECT _id AS user_id, created_date AS signup_datetime
-        FROM user_table
-        WHERE  created_date <= '03/03/2018';
-    """
-    user_signup_df = query_to_dataframe(user_signup_hist_query)
-    user_signup_df['signup_date'] = user_signup_df['signup_datetime'].dt.date
-    #user_signup_df['user_id'] = user_signup_df.user_id.str.replace('x', '.').astype(float)
-    user_signup_df['signup_date'] =  pd.to_datetime(user_signup_df['signup_date'])
-    print(user_signup_df.info())
-    print(user_signup_df.head())
-    #user_signup_df.hist()
-    user_signup_df[['signup_date','user_id']].groupby([user_signup_df["signup_date"].dt.year, user_signup_df["signup_date"].dt.month]).count().plot(kind="bar")
-    plt.show()
+#
+# def create_main_df():
+#     table_dataframes = []
+#     tables = ["preset", "preset_array", "protocol", "protocol_array",  "scale_option",  "map_protocol_day_entry", "user_table", "entry"]
+#     for table in tables:
+#         all_rows_per_table_query = f'SELECT * FROM {table};'
+#         table_dataframes.append(query_to_dataframe(all_rows_per_table_query))
+#
+#     table_dataframes[0].dropna(axis=1,how='all', inplace=True)
+#     for column in table_dataframes[0].columns:
+#         if column == '_id':
+#             table_dataframes[0].rename(index=str, columns={column: "preset_id"}, inplace=True)
+#         else:
+#             table_dataframes[0].rename(index=str, columns={column: f"preset_{column}"}, inplace=True)
+#     table_dataframes[1].dropna(axis=1,how='all', inplace=True)
+#     for column in table_dataframes[1].columns:
+#         if column == '_id':
+#             table_dataframes[1].rename(index=str, columns={column: "preset_array_id"}, inplace=True)
+#         else:
+#             table_dataframes[1].rename(index=str, columns={column: f"preset_array_{column}"}, inplace=True)
+#     table_dataframes[2].dropna(axis=1,how='all', inplace=True)
+#     for column in table_dataframes[2].columns:
+#         if column == '_id':
+#             table_dataframes[2].rename(index=str, columns={column: "protocol_id"}, inplace=True)
+#         else:
+#             table_dataframes[2].rename(index=str, columns={column: f"protocol_{column}"}, inplace=True)
+#     table_dataframes[3].dropna(axis=1,how='all', inplace=True)
+#     for column in table_dataframes[3].columns:
+#         if column == '_id':
+#             table_dataframes[3].rename(index=str, columns={column: "protocol_array_id"}, inplace=True)
+#         else:
+#             table_dataframes[3].rename(index=str, columns={column: f"protocol_array_{column}"}, inplace=True)
+#     # table_dataframes[4].rename(index=str, columns={"_id": "scale_option_id"}, inplace=True)
+#     # table_dataframes[4].dropna(axis=1,how='all', inplace=True)
+#     table_dataframes[5].dropna(axis=1,how='all', inplace=True)
+#     for column in table_dataframes[5].columns:
+#         if column == '_id':
+#             table_dataframes[5].rename(index=str, columns={column: "map_protocol_day_entry_id"}, inplace=True)
+#         if column == 'entry_id' or column == 'protocol_id' or column == 'protocol_array_id':
+#             continue
+#         else:
+#             table_dataframes[5].rename(index=str, columns={column: f"map_protocol_day_entry_{column}"}, inplace=True)
+#     table_dataframes[6].dropna(axis=1,how='all', inplace=True)
+#     for column in table_dataframes[6].columns:
+#         if column == '_id':
+#             table_dataframes[6].rename(index=str, columns={column: "user_id"}, inplace=True)
+#         else:
+#             table_dataframes[6].rename(index=str, columns={column: f"user_{column}"}, inplace=True)
+#     table_dataframes[7].dropna(axis=1,how='all', inplace=True)
+#     for column in table_dataframes[7].columns:
+#         if column == 'chosen_user':
+#             table_dataframes[7].rename(index=str, columns={column: "user_id"}, inplace=True)
+#         elif column == '_id':
+#             table_dataframes[7].rename(index=str, columns={column: "entry_id"}, inplace=True)
+#         elif column == 'preset_array':
+#             table_dataframes[7].rename(index=str, columns={column: "preset_array_id"}, inplace=True)
+#         else:
+#             table_dataframes[7].rename(index=str, columns={column: f"entry_{column}"}, inplace=True)
+#
 
-def create_main_df():
-    table_dataframes = []
-    tables = ["preset", "preset_array", "protocol", "protocol_array",  "scale_option",  "map_protocol_day_entry", "user_table", "entry"]
-    for table in tables:
-        all_rows_per_table_query = f'SELECT * FROM {table};'
-        table_dataframes.append(query_to_dataframe(all_rows_per_table_query))
 
-    table_dataframes[0].dropna(axis=1,how='all', inplace=True)
-    for column in table_dataframes[0].columns:
-        if column == '_id':
-            table_dataframes[0].rename(index=str, columns={column: "preset_id"}, inplace=True)
-        else:
-            table_dataframes[0].rename(index=str, columns={column: f"preset_{column}"}, inplace=True)
-    table_dataframes[1].dropna(axis=1,how='all', inplace=True)
-    for column in table_dataframes[1].columns:
-        if column == '_id':
-            table_dataframes[1].rename(index=str, columns={column: "preset_array_id"}, inplace=True)
-        else:
-            table_dataframes[1].rename(index=str, columns={column: f"preset_array_{column}"}, inplace=True)
-    table_dataframes[2].dropna(axis=1,how='all', inplace=True)
-    for column in table_dataframes[2].columns:
-        if column == '_id':
-            table_dataframes[2].rename(index=str, columns={column: "protocol_id"}, inplace=True)
-        else:
-            table_dataframes[2].rename(index=str, columns={column: f"protocol_{column}"}, inplace=True)
-    table_dataframes[3].dropna(axis=1,how='all', inplace=True)
-    for column in table_dataframes[3].columns:
-        if column == '_id':
-            table_dataframes[3].rename(index=str, columns={column: "protocol_array_id"}, inplace=True)
-        else:
-            table_dataframes[3].rename(index=str, columns={column: f"protocol_array_{column}"}, inplace=True)
-    # table_dataframes[4].rename(index=str, columns={"_id": "scale_option_id"}, inplace=True)
-    # table_dataframes[4].dropna(axis=1,how='all', inplace=True)
-    table_dataframes[5].dropna(axis=1,how='all', inplace=True)
-    for column in table_dataframes[5].columns:
-        if column == '_id':
-            table_dataframes[5].rename(index=str, columns={column: "map_protocol_day_entry_id"}, inplace=True)
-        if column == 'entry_id' or column == 'protocol_id' or column == 'protocol_array_id':
-            continue
-        else:
-            table_dataframes[5].rename(index=str, columns={column: f"map_protocol_day_entry_{column}"}, inplace=True)
-    table_dataframes[6].dropna(axis=1,how='all', inplace=True)
-    for column in table_dataframes[6].columns:
-        if column == '_id':
-            table_dataframes[6].rename(index=str, columns={column: "user_id"}, inplace=True)
-        else:
-            table_dataframes[6].rename(index=str, columns={column: f"user_{column}"}, inplace=True)
-    table_dataframes[7].dropna(axis=1,how='all', inplace=True)
-    for column in table_dataframes[7].columns:
-        if column == 'chosen_user':
-            table_dataframes[7].rename(index=str, columns={column: "user_id"}, inplace=True)
-        elif column == '_id':
-            table_dataframes[7].rename(index=str, columns={column: "entry_id"}, inplace=True)
-        elif column == 'preset_array':
-            table_dataframes[7].rename(index=str, columns={column: "preset_array_id"}, inplace=True)
-        else:
-            table_dataframes[7].rename(index=str, columns={column: f"entry_{column}"}, inplace=True)
-
-def create_smaller_main_df():
-    table_dataframes = []
-    tables = ["user_table", "entry"]
-    for table in tables:
-        all_rows_per_table_query = f'SELECT * FROM {table};'
-        table_dataframes.append(query_to_dataframe(all_rows_per_table_query))
-
-    table_dataframes[0].dropna(axis=1,how='all', inplace=True)
-    for column in table_dataframes[0].columns:
-        if column == '_id':
-            table_dataframes[0].rename(index=str, columns={column: "user_id"}, inplace=True)
-        else:
-            table_dataframes[0].rename(index=str, columns={column: f"user_{column}"}, inplace=True)
-    table_dataframes[1].dropna(axis=1,how='all', inplace=True)
-    for column in table_dataframes[1].columns:
-        if column == 'chosen_user':
-            table_dataframes[1].rename(index=str, columns={column: "user_id"}, inplace=True)
-        elif column == '_id':
-            table_dataframes[1].rename(index=str, columns={column: "entry_id"}, inplace=True)
-        elif column == 'preset_array':
-            table_dataframes[1].rename(index=str, columns={column: "preset_array_id"}, inplace=True)
-        else:
-            table_dataframes[1].rename(index=str, columns={column: f"entry_{column}"}, inplace=True)
-
-    main_df = table_dataframes[0].merge(table_dataframes[1],how='left',on = 'user_id')
-    #print(main_df.info())
-    return main_df
-
-def df_to_csv(df, path):
-    df.to_csv(path, ",")
 def csv_to_df(path):
     return pd.read_csv(path, ",")
 
-def clean_data_types(main_df):
-    #main_df['user_id'] = main_df.user_id.str.replace('x', '.').astype(float)
-    main_df["entry_chosen_datetime"] = main_df['entry_chosen_datetime'].dt.date
-    main_df["entry_chosen_datetime"] = pd.to_datetime(main_df['entry_chosen_datetime'])
-    # main_df['user_bio_sex'].replace(('Male','Female'), (1,0), inplace=True)
-    # main_df['entry_bio_sex'].replace(('Male','Female'), (1,0), inplace=True)
-    # main_df['user_pregnant_yn'].fillna(-1, inplace=True)
-    # main_df['entry_pregnant_yn'].fillna(-1, inplace=True)
-    return main_df
 
-def get_counts(main_df):
-    counts_df = pd.DataFrame(data=main_df['user_id'].unique(), columns=["user_id"], index=main_df['user_id'].unique())
-    for column in main_df.columns:
-        if column in ["user_id", 'days_inactive', 'days_active', 'estimated_created_date']:
-            continue
-        else:
-            counts_df[f'{column}_cnt'] = main_df.groupby("user_id")[column].nunique()
-    counts_df = counts_df.reset_index().drop("index", axis=1)
-    counts_df['data_points'] = counts_df.drop(["user_id"],axis=1).sum(axis=1)
-    return counts_df[["user_id","data_points","entry_chosen_datetime_cnt","entry_id_cnt"]]
 
-def get_days_active(main_df):
-    active_days = main_df.groupby('user_id').max()['entry_created_date'] - main_df.groupby('user_id').min()['estimated_created_date']
-    active_days = active_days.fillna(1)
-    active_days = active_days.dt.ceil('1D')
-    active_days = active_days.dt.days.astype(int)
-    active_days = active_days.reset_index()
-    active_days = active_days.rename(columns={'index': 'user_id', 0: 'days_active'})
-    #defining 1 as lowest num of active days possible for math reasons
-    main_df = main_df.merge(active_days, how='left', on='user_id')
-    return main_df
-
-def get_days_inactive(main_df):
-    inactive_days = pd.to_datetime('03/03/2018') - np.maximum(main_df.groupby('user_id').max()['entry_created_date'],main_df.groupby('user_id').max()['estimated_created_date'])
-    #inactive_days = active_days.fillna(0)
-    inactive_days = inactive_days.dt.days.astype(int)
-    inactive_days = inactive_days.reset_index()
-    inactive_days = inactive_days.rename(columns={'index': 'user_id', 'entry_created_date': 'days_inactive'})
-    main_df = main_df.merge(inactive_days, how='left', on='user_id')
-    return main_df
-
-def get_estimated_created_date(main_df):
-    estimated_created_date_df = np.minimum(main_df.groupby('user_id').min()['user_created_date'],main_df.groupby('user_id').min()['entry_created_date'])
-    estimated_created_date_df = estimated_created_date_df.reset_index()
-    estimated_created_date_df = estimated_created_date_df.rename(columns={'index': 'user_id', 'user_created_date': 'estimated_created_date'})
-    main_df = main_df.merge(estimated_created_date_df, how='left', on='user_id')
-    return main_df
 
 def corr_heatmap_with_values(df, title):
     corr = df.corr()
@@ -495,103 +280,7 @@ def corr_heatmap_with_values(df, title):
     plt.tight_layout()
     plt.show()
 
-def dec_vs_other_months(hypothesis_df):
-    #hypothesis_df['estimated_created_date'] = hypothesis_df['estimated_created_date'].astype('datetime64[ns]')
-    hypothesis_df_Dec = hypothesis_df.loc[hypothesis_df['estimated_created_date'].dt.month == 12]
-    hypothesis_df_not_Dec = hypothesis_df.loc[hypothesis_df['estimated_created_date'].dt.month < 12]
-    dec_active = hypothesis_df_Dec.loc[hypothesis_df_Dec['user_active_yn']==1]
-    other_active = hypothesis_df_not_Dec.loc[hypothesis_df_not_Dec['user_active_yn']==1]
 
-
-    # plt.hist([dec_active['user_activity_score'],other_active['user_activity_score']], 10, histtype='bar', color=['blue','green'], label=['December','All Other Months'])
-    # plt.ylabel('User Count')
-    # plt.xlabel('User Activity Score')
-    # plt.title('User Activity Scores\nDecember vs All Other Months')
-    # plt.legend()
-    # plt.show()
-    #
-    # plt.hist([hypothesis_df_Dec['user_active_yn'],hypothesis_df_not_Dec['user_active_yn']], 10, histtype='bar', color=['blue','green'], label=['December','All Other Months'])
-    # plt.ylabel('User Count')
-    # plt.xlabel('User Active YN')
-    # plt.title('User Active YN\nDecember vs All Other Months')
-    # plt.legend()
-    # plt.show()
-
-
-    bootstrap_ci(dec_active['user_activity_score'], 'December User Activity Score')
-    bootstrap_ci(other_active['user_activity_score'], 'All Other Months User Activity Score')
-    bootstrap_ci(hypothesis_df_Dec['user_active_yn'], 'December User Active YN')
-    bootstrap_ci(hypothesis_df_not_Dec['user_active_yn'], 'All Other Months User Active YN')
-
-    #dec sample for H on user_active_score
-    print("Running ttest on user_active score for Dec vs all other months")
-    print(f"Dec Average: {dec_active['user_activity_score'].mean():.2f}")
-    print(f'Other Average: {other_active["user_activity_score"].mean():.2f}')
-    other_sample = other_active.sample(len(dec_active.index))
-    user_active_score_ttest = stats.ttest_ind(dec_active['user_activity_score'], other_sample['user_activity_score'])
-    print(user_active_score_ttest)
-    #Ttest_indResult(statistic=-5.9016620625301828, pvalue=4.0248341180765505e-09)
-
-    #dec sample for H on user activity yn
-    print("Running ttest on user active yn for Dec vs all other months")
-    print(f"Dec Average: {hypothesis_df_Dec['user_active_yn'].mean():.2f}")
-    print(f'Other Average: {hypothesis_df_not_Dec["user_active_yn"].mean():.2f}')
-    hypothesis_df_Dec_sample = hypothesis_df_Dec.sample(len(hypothesis_df_not_Dec.index))
-    user_active_ttest = stats.ttest_ind(hypothesis_df_Dec_sample['user_active_yn'], hypothesis_df_not_Dec['user_active_yn'])
-    print(user_active_ttest)
-    #Ttest_indResult(statistic=-12.497492110151295, pvalue=6.2818586376725302e-35)
-
-
-    '''
-    Running ttest on user_active score for Dec vs all other months
-    Dec Average: 0.8813206096033261
-    Other Average: 2.769237275134839
-    Ttest_indResult(statistic=-14.63079024707694, pvalue=8.6358543621434763e-47)
-
-    Running ttest on user active yn for Dec vs all other months
-    Dec Average: 0.30687830687830686
-    Other Average: 0.5045742434904996
-    Ttest_indResult(statistic=-10.82884489661955, pvalue=8.3293441015901507e-27)
-
-    '''
-def lasso_fit_and_print(target_name, predictor, target, predvar_columns):
-    pred_train, pred_test, tar_train, tar_test = train_test_split(predictor, target,test_size=.3)
-    model=LassoLarsCV(cv=10, precompute=False).fit(pred_train,tar_train)
-    m_log_alphas = -np.log10(model.alphas_)
-    ax = plt.gca()
-    plt.plot(m_log_alphas, model.coef_path_.T)
-    plt.axvline(-np.log10(model.alpha_), color='k',label='alpha CV')
-    plt.ylabel('Regression Coefficients')
-    plt.legend()
-    plt.xlabel('-log(alpha)')
-    plt.title(f'Regression Coefficients Progression for Lasso Paths\n{target_name}')
-    plt.show()
-    # print variable names and regression coefficients
-    var_imp = pd.DataFrame(data = {'predictors':list(predvar_columns.values),'coefficients':model.coef_})
-    var_imp['sort'] = var_imp.coefficients.abs()
-    print(f"{target_name} Coefficients")
-    print(var_imp.sort_values(by='sort', ascending=False))
-
-def lasso_attempt(data_clean):
-    #creating predictors and targets
-    predvar_all = data_clean.drop(['user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive'], axis=1)
-    target1 = data_clean['user_active_yn']
-    active_users = data_clean.loc[data_clean['user_active_yn']==1]
-    target2 = active_users['user_activity_score']
-    target3 = active_users['user_activity_cnt']
-    target4 = active_users['days_active']
-    target5 = active_users['days_inactive']
-    predvar_active = active_users.drop(['user_active_yn','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive'], axis=1)
-    scaler = StandardScaler()
-    scaler.fit(predvar_all)
-    predictors_all=scaler.transform(predvar_all)
-    scaler.fit(predvar_active)
-    predictors_active = scaler.transform(predvar_active)
-    lasso_fit_and_print("User Active YN", predictors_all, target1, predvar_all.columns)
-    lasso_fit_and_print("User Activity Score", predictors_active, target2, predvar_active.columns)
-    lasso_fit_and_print("User Activity Count", predictors_active, target3, predvar_active.columns)
-    lasso_fit_and_print("Days Active", predictors_active, target4, predvar_active.columns)
-    lasso_fit_and_print("Days Inactive", predictors_active, target5, predvar_active.columns)
 
 def correlation_maps_lasso(user_profile):
     corr_heatmap_with_values(user_profile[['user_active_yn','dup_protocol_started','caffeine_yn','dup_protocol_finished', 'married_yn', 'usual_activity_len', 'alcohol_yn', 'bio_sex_answered', 'bio_sex', 'menstruation_yn', 'blood_type_answered', 'usual_diet_len', 'usual_medications_len', 'usual_conditions_len']], "User Active YN\nLasso Based Correlation Heat Map")
@@ -603,182 +292,24 @@ def correlation_maps_lasso(user_profile):
     corr_heatmap_with_values(user_profile[['days_active', 'pregnant_answered','caffeine_yn', 'alcohol_answered', 'married_answered', 'menstruation_answered', 'usual_diet_len', 'caffeine_answered','usual_activity_len','blood_type_answered', 'married_yn', 'dup_protocol_started',]], 'Days Active\nLasso Based Correlation Heat Map')
 
     corr_heatmap_with_values(user_profile[['days_inactive', 'height_likelihood','blood_type_answered', 'caffeine_yn', 'dup_protocol_started', 'pregnant_yn', 'smoke_yn', 'dup_protocol_active','smoke_answered','menstruation_yn', 'dup_protocol_finished', 'bio_sex_answered']], 'Days Inactive\nLasso Based Correlation Heat Map')
+#
+# def add_months(user_profile_df):
+#     user_profile_df['month_created'] = user_profile_df['created_date'].dt.month.astype(int)
+#     user_profile_df = pd.get_dummies(user_profile_df, columns=['month_created'])
+#     for num in range(1,13):
+#         if f'month_created_{num}' in user_profile_df.columns:
+#             continue
+#         else:
+#             user_profile_df[f'month_created_{num}'] = [0]*len(user_profile_df.index)
+#     return user_profile_df
 
-def add_months(user_profile_df):
-    user_profile_df['month_created'] = user_profile_df['created_date'].dt.month.astype(int)
-    user_profile_df = pd.get_dummies(user_profile_df, columns=['month_created'])
-    for num in range(1,13):
-        if f'month_created_{num}' in user_profile_df.columns:
-            continue
-        else:
-            user_profile_df[f'month_created_{num}'] = [0]*len(user_profile_df.index)
-    return user_profile_df
 
-def bootstrap(sample_array, resample=10000):
-    '''Implement a bootstrap function to randomly draw with replacement from a given sample. The function should take a sample as a numpy ndarray and the number of resamples as an integer (default: 10000). The function should return a list of numpy ndarray objects, each ndarray is one bootstrap sample.'''
-    samples = []
-    sample_array=sample_array.ravel()
-    for num in range(resample):
-        samples.append(np.random.choice(sample_array, len(sample_array)))
-    return samples
 
-def bootstrap_ci(sample,name, stat_function=np.mean, iterations=1000, ci=95):
-    '''Implement a bootstrap_ci function to calculate the confidence interval of any sample statistic (in this case the mean). The function should take a sample, a function that computes the sample statistic, the number of resamples (default: 10000), and the confidence interval (default :95%). The function should return the lower and upper bounds of the confidence interval and the bootstrap distribution of the test statistic.'''
-    sample_lst = bootstrap(sample, iterations)
-    results = []
-    for sample_set in sample_lst:
-        results.append(stat_function(sample_set))
-    results.sort()
-    results = np.array(results)
-
-    '''this does the same as the np.percentile under it'''
-    #results_cut = results[int((len(results)*((1-(ci/100))/2))):int(len(results)-(len(results)*((1-(ci/100))/2)))]
-    plot_histogram_with_normal(results, name)
-    return (np.percentile(results, q=[(100-ci)/2,100-(100-ci)/2]), np.mean(results))
-
-def plot_histogram_with_normal(data, name):
-    '''simplest form of a histogram'''
-    fig = plt.figure(figsize=(12,12))
-    ax = fig.add_subplot(111)
-    x_range = np.linspace(stats.norm.ppf(0.0001, data.mean(), data.std()),stats.norm.ppf(0.9999, data.mean(), data.std()), 100)
-    ax.hist(data, normed=True)
-    normal = stats.norm.pdf(x_range, data.mean(), data.std())
-    normal_line =ax.plot(x_range, normal, label='normal pmf', color='r')
-    ax.set_title(f"{name}\nmean:{data.mean():.2f} std:{data.std():.2f}\nKS Test P value:{stats.kstest(data, 'norm',args=[data.mean(), data.std()])[1]:.2f}")
-    ax.set_xlabel(name)
-    plt.show()
-
-def create_user_profile():
-    main_df = clean_data_types(create_smaller_main_df())
-    main_df= get_estimated_created_date(main_df)
-    main_df= get_days_active(main_df)
-    main_df= get_days_inactive(main_df)
-    counts_df = get_counts(main_df)
-    missing_counts = main_df[['user_id', 'estimated_created_date', 'days_active', 'days_inactive']]
-    missing_counts = missing_counts.groupby(['user_id'])['estimated_created_date', 'days_active', 'days_inactive'].min()
-    missing_counts = missing_counts.reset_index()
-    counts_df = counts_df.merge(missing_counts, how='left', on='user_id')
-
-    counts_df['user_activity_cnt'] = counts_df['entry_chosen_datetime_cnt']+counts_df['entry_id_cnt']
-    counts_df['user_activity_score'] = counts_df['user_activity_cnt'].astype(float)/counts_df['days_active'].astype(float)
-
-    user_profile_df = query_to_dataframe('SELECT * FROM user_table;')
-    user_profile_df.rename(index=str, columns={'_id': "user_id"}, inplace=True)
-
-    user_profile_df = user_profile_df.merge(counts_df[['user_id','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']],how='left',on = 'user_id')
-    user_profile_df['user_active_yn'] =  np.where(user_profile_df['user_activity_score']==0,0,1)
-    user_profile_df.dropna(axis=1,how='all', inplace=True)
-    user_profile_df['bio_sex'].replace(('Male','Female'), (1,0), inplace=True)
-    user_profile_df['dup_protocol_started'] = user_profile_df['dup_protocol_started'].fillna(0)
-    user_profile_df['dup_protocol_started'] =  np.where(user_profile_df['dup_protocol_started']==0,0,1)
-    user_profile_df['dup_protocol_active'] = user_profile_df['dup_protocol_active'].fillna(0)
-    user_profile_df['dup_protocol_active'] =  np.where(user_profile_df['dup_protocol_active']==0,0,1)
-    user_profile_df['dup_protocol_finished'] = user_profile_df['dup_protocol_finished'].fillna(0)
-    user_profile_df['dup_protocol_finished'] =  np.where(user_profile_df['dup_protocol_finished']==0,0,1)
-    user_profile_df.drop('modified_date', axis=1, inplace=True)
-    user_profile_df['usual_conditions_len'] = user_profile_df['usual_conditions'].str.len()
-    user_profile_df['usual_conditions_len'] =user_profile_df['usual_conditions_len'].fillna(0)
-    user_profile_df.drop('usual_conditions', axis=1, inplace=True)
-    user_profile_df.drop('anon_code', axis=1, inplace=True)
-    user_profile_df['usual_medications_len'] = user_profile_df['usual_medications'].str.len()
-    user_profile_df['usual_medications_len'] =user_profile_df['usual_medications_len'].fillna(0)
-    user_profile_df.drop('usual_medications', axis=1, inplace=True)
-    user_profile_df['usual_diet_len'] = user_profile_df['usual_diet'].str.len()
-    user_profile_df['usual_diet_len'] =user_profile_df['usual_diet_len'].fillna(0)
-    user_profile_df.drop('usual_diet', axis=1, inplace=True)
-    user_profile_df['usual_activity_len'] = user_profile_df['usual_activity'].str.len()
-    user_profile_df['usual_activity_len'] =user_profile_df['usual_activity_len'].fillna(0)
-    user_profile_df.drop('usual_activity', axis=1, inplace=True)
-    user_profile_df.drop('protocol_array_list', axis=1, inplace=True)
-    user_profile_df['smoke_answered'] = user_profile_df['smoke_yn']
-    user_profile_df['smoke_answered'] = user_profile_df['smoke_answered'].fillna(-1)
-    user_profile_df['smoke_answered'] = np.where(user_profile_df['smoke_answered']==-1, 0, 1)
-    user_profile_df['smoke_yn'] = user_profile_df['smoke_yn'].fillna(0)
-
-    user_profile_df['alcohol_answered'] = user_profile_df['alcohol_yn']
-    user_profile_df['alcohol_answered'] = user_profile_df['alcohol_answered'].fillna(-1)
-    user_profile_df['alcohol_answered'] = np.where(user_profile_df['alcohol_answered']==-1, 0, 1)
-    user_profile_df['alcohol_yn'] = user_profile_df['alcohol_yn'].fillna(0)
-
-    user_profile_df['married_answered'] = user_profile_df['married_yn']
-    user_profile_df['married_answered'] = user_profile_df['married_answered'].fillna(-1)
-    user_profile_df['married_answered'] = np.where(user_profile_df['married_answered']==-1, 0, 1)
-    user_profile_df['married_yn'] = user_profile_df['married_yn'].fillna(0)
-    user_profile_df['caffeine_answered'] = user_profile_df['caffeine_yn']
-    user_profile_df['caffeine_answered'] = user_profile_df['caffeine_answered'].fillna(-1)
-    user_profile_df['caffeine_answered'] = np.where(user_profile_df['caffeine_answered']==-1, 0, 1)
-    user_profile_df['caffeine_yn'] = user_profile_df['caffeine_yn'].fillna(0)
-    user_profile_df['pregnant_answered'] = user_profile_df['pregnant_yn']
-    user_profile_df['pregnant_answered'] = user_profile_df['pregnant_answered'].fillna(-1)
-    user_profile_df['pregnant_answered'] = np.where(user_profile_df['pregnant_answered']==-1, 0, 1)
-    user_profile_df['pregnant_yn'] = user_profile_df['pregnant_yn'].fillna(0)
-    user_profile_df['blood_type_answered'] = user_profile_df['blood_type']
-    user_profile_df['blood_type_answered'] = user_profile_df['blood_type_answered'].fillna(-1)
-    user_profile_df['blood_type_answered'] = np.where(user_profile_df['blood_type_answered']==-1, 0, 1)
-    user_profile_df.drop('blood_type', axis=1, inplace=True)
-
-    user_profile_df['bio_sex_answered'] = user_profile_df['bio_sex']
-    user_profile_df['bio_sex_answered'] = user_profile_df['bio_sex_answered'].fillna(-1)
-    user_profile_df['bio_sex_answered'] = np.where(user_profile_df['bio_sex_answered']==-1, 0, 1)
-    user_profile_df['bio_sex'] = user_profile_df['bio_sex'].fillna(0)
-
-    user_profile_df['menstruation_answered'] = user_profile_df['menstruation_yn']
-    user_profile_df['menstruation_answered'] = user_profile_df['menstruation_answered'].fillna(-1)
-    user_profile_df['menstruation_answered'] = np.where(user_profile_df['menstruation_answered']==-1, 0, 1)
-    user_profile_df['menstruation_yn'] = user_profile_df['menstruation_yn'].fillna(0)
-
-    '''user_profile_df=add_months(user_profile_df)'''
-    user_profile_df.drop('created_date', axis=1, inplace=True)
-
-    #so as to not have to pull sensus data, useing http://www.usablestats.com/lessons/normal for average heights and distributions
-    #adult male heights are on average 70 inches  (5'10) with a standard deviation of 4 inches. Adult women are on average a bit shorter and less variable in height with a mean height of 65  inches (5'5) and standard deviation of 3.5 inches
-    # male_average_height = 177.8
-    # male_sd_height = 10.16
-    # female_average_height = 165.1
-    # female_sd_height = 8.89
-    #male_norm = stats.norm(male_average_height,male_sd_height)
-    #female_norm = stats.norm(female_average_height,female_sd_height)
-    adult_avg_height = 177+165/2
-    adult_sd_height = 20
-    adult_norm = stats.norm(adult_avg_height, adult_sd_height)
-    user_profile_df['height_cm'] = user_profile_df['height_cm'].fillna(0)
-    user_profile_df['height_likelihood'] = user_profile_df['height_cm'].apply(lambda x: adult_norm.pdf(x))
-    user_profile_df.drop('height_cm', axis=1, inplace=True)
-    return user_profile_df
-
-def standard_confusion_matrix(y_true, y_predict):
-    y_true = np.array(y_true)
-    y_predict = np.array(y_predict)
-    true_positives = np.sum(np.logical_and(y_predict==1,y_true==1))
-    false_positives = np.sum(np.logical_and(y_predict==1,y_true==0))
-    false_negatives = np.sum(np.logical_and(y_predict==0,y_true==1))
-    true_negatives = np.sum(np.logical_and(y_predict==0,y_true==0))
-    confusion_matrix = np.array([[true_positives,false_positives],[false_negatives,true_negatives]])
-    return confusion_matrix
 
 # print(standard_confusion_matrix([1, 1, 1, 1, 1, 0, 0], [1, 1, 1, 1, 0, 0, 0]))
 
-def profit_curve(cost_benefit, predicted_probs, y_true):
-    thresholds = np.sort(predicted_probs)
-    thresholds = np.append(thresholds, [1.0])
-    expected_profits = []
-    for threshold in thresholds:
-        confusion_matrix = standard_confusion_matrix(y_true, predicted_probs >= threshold)
-        expected_profits.append(np.sum(confusion_matrix * cost_benefit)/np.sum(confusion_matrix))
-    return np.array([thresholds, expected_profits])
 
-def plot_profit_curve(model, cost_benefit, X_train, X_test, y_train, y_test):
-    model.fit(X_train, y_train)
-    predicted_probs = model.predict_proba(X_test)
-    profits = profit_curve(cost_benefit, predicted_probs[:,1], y_test)
-    percentages = profits[0]
-    profits = profits[1]
-    plt.plot(percentages, profits, label='profit')
-    plt.title("Profit Curve")
-    plt.xlabel("Percentage of test instances (decreasing by score)")
-    plt.ylabel("Profit")
-    plt.legend(loc='best')
-    plt.show()
+
 
 #user_profile_df = create_user_profile()
 '''
