@@ -3,17 +3,36 @@ file creates the csv for the user_profile_df. Should only be run once for each d
 
 '''
 import pandas as pd
+from sklearn.pipeline import make_pipeline
+import trackwell_pipelines as pipe
 
 psql_user = os.environ.get('PSQL_USER')
 psql_password = os.environ.get('PSQL_PASSWORD')
 psql_db_name = os.environ.get('PSQL_TRACKWELL')
 
-def drop_empty_columns(df):
-    '''
-    Input: a dataframe to clean
-    Return: dataframe without columns that are entirly null
-    '''
-    return df.dropna(axis=1,how='all')
+
+def create_user_profile():
+    main_df = merge_user_entry_tables()
+
+    '''currently at sudo-code level, changing full feature engineering section into pipelines'''
+    pipeline{
+        FeatureUnion{'MergeOnUserID'
+            #pipeline {DropEmptyColumns(everything but 'user_created_date')},
+            pipeline {GroupByUserIDMin(), ToDateDropTime(just 'entry_chosen_datetime' & 'user_created_date'), CreateEstimatedUserCreatedDate()}
+            }
+        pipline {GroupByUserIDMax(), CreateMaxDaysActive(), CreateDaysSinceActive()
+
+        }
+            }
+
+    #main_df = entry_dt_update_type(main_df)
+    #main_df = get_estimated_created_date(main_df)
+    #main_df = get_days_active(main_df)
+    #main_df = get_days_inactive(main_df)
+    counts_df = get_counts(main_df)
+    user_profile = clean_user_profile(counts_df)
+    df_to_csv(user_profile, 'user_profile.csv')
+
 
 def merge_user_entry_tables():
     '''
@@ -27,8 +46,8 @@ def merge_user_entry_tables():
         all_rows_per_table_query = f'SELECT * FROM {table};'
         table_dataframes.append(query_to_dataframe(all_rows_per_table_query))
     #drop columns with all na
-    table_dataframes[0] = drop_empty_columns(table_dataframes[0])
-    table_dataframes[1] = drop_empty_columns(table_dataframes[1])
+    #table_dataframes[0] = drop_empty_columns(table_dataframes[0])
+    #table_dataframes[1] = drop_empty_columns(table_dataframes[1])
     #change column names for user_table
     for column in table_dataframes[0].columns:
         if column == '_id':
@@ -48,16 +67,24 @@ def merge_user_entry_tables():
     #return the two dataframes merged together on user_id
     return table_dataframes[0].merge(table_dataframes[1],how='left',on = 'user_id')
 
+# def drop_empty_columns(df):
+#     '''
+#     Input: a dataframe to clean
+#     Return: dataframe without columns that are entirly null
+#     '''
+#     return df.dropna(axis=1,how='all')
 
-def clean_data_types(main_df):
-    #main_df['user_id'] = main_df.user_id.str.replace('x', '.').astype(float)
-    main_df["entry_chosen_datetime"] = main_df['entry_chosen_datetime'].dt.date
-    main_df["entry_chosen_datetime"] = pd.to_datetime(main_df['entry_chosen_datetime'])
-    # main_df['user_bio_sex'].replace(('Male','Female'), (1,0), inplace=True)
-    # main_df['entry_bio_sex'].replace(('Male','Female'), (1,0), inplace=True)
-    # main_df['user_pregnant_yn'].fillna(-1, inplace=True)
-    # main_df['entry_pregnant_yn'].fillna(-1, inplace=True)
-    return main_df
+# def entry_dt_update_type(main_df):
+#     main_df["entry_chosen_datetime"] = main_df['entry_chosen_datetime'].dt.date
+#     main_df["entry_chosen_datetime"] = pd.to_datetime(main_df['entry_chosen_datetime'])
+#     return main_df
+
+# def get_estimated_created_date(main_df):
+#     estimated_created_date_df = np.minimum(main_df.groupby('user_id').min()['user_created_date'],main_df.groupby('user_id').min()['entry_created_date'])
+#     estimated_created_date_df = estimated_created_date_df.reset_index()
+#     estimated_created_date_df = estimated_created_date_df.rename(columns={'index': 'user_id', 'user_created_date': 'estimated_created_date'})
+#     main_df = main_df.merge(estimated_created_date_df, how='left', on='user_id')
+#     return main_df
 
 def get_counts(main_df):
     counts_df = pd.DataFrame(data=main_df['user_id'].unique(), columns=["user_id"], index=main_df['user_id'].unique())
@@ -70,39 +97,29 @@ def get_counts(main_df):
     counts_df['data_points'] = counts_df.drop(["user_id"],axis=1).sum(axis=1)
     return counts_df[["user_id","data_points","entry_chosen_datetime_cnt","entry_id_cnt"]]
 
-def get_days_active(main_df):
-    active_days = main_df.groupby('user_id').max()['entry_created_date'] - main_df.groupby('user_id').min()['estimated_created_date']
-    active_days = active_days.fillna(1)
-    active_days = active_days.dt.ceil('1D')
-    active_days = active_days.dt.days.astype(int)
-    active_days = active_days.reset_index()
-    active_days = active_days.rename(columns={'index': 'user_id', 0: 'days_active'})
-    #defining 1 as lowest num of active days possible for math reasons
-    main_df = main_df.merge(active_days, how='left', on='user_id')
-    return main_df
+# def get_days_active(main_df):
+#     active_days = main_df.groupby('user_id').max()['entry_created_date'] - main_df.groupby('user_id').min()['estimated_created_date']
+#     active_days = active_days.fillna(1)
+#     active_days = active_days.dt.ceil('1D')
+#     active_days = active_days.dt.days.astype(int)
+#     active_days = active_days.reset_index()
+#     active_days = active_days.rename(columns={'index': 'user_id', 0: 'days_active'})
+#     #defining 1 as lowest num of active days possible for math reasons
+#     main_df = main_df.merge(active_days, how='left', on='user_id')
+#     return main_df
 
-def get_days_inactive(main_df):
-    inactive_days = pd.to_datetime('03/03/2018') - np.maximum(main_df.groupby('user_id').max()['entry_created_date'],main_df.groupby('user_id').max()['estimated_created_date'])
-    #inactive_days = active_days.fillna(0)
-    inactive_days = inactive_days.dt.days.astype(int)
-    inactive_days = inactive_days.reset_index()
-    inactive_days = inactive_days.rename(columns={'index': 'user_id', 'entry_created_date': 'days_inactive'})
-    main_df = main_df.merge(inactive_days, how='left', on='user_id')
-    return main_df
+# def get_days_inactive(main_df):
+#     inactive_days = pd.to_datetime('03/03/2018') - np.maximum(main_df.groupby('user_id').max()['entry_created_date'],main_df.groupby('user_id').max()['estimated_created_date'])
+#     #inactive_days = active_days.fillna(0)
+#     inactive_days = inactive_days.dt.days.astype(int)
+#     inactive_days = inactive_days.reset_index()
+#     inactive_days = inactive_days.rename(columns={'index': 'user_id', 'entry_created_date': 'days_inactive'})
+#     main_df = main_df.merge(inactive_days, how='left', on='user_id')
+#     return main_df
 
-def get_estimated_created_date(main_df):
-    estimated_created_date_df = np.minimum(main_df.groupby('user_id').min()['user_created_date'],main_df.groupby('user_id').min()['entry_created_date'])
-    estimated_created_date_df = estimated_created_date_df.reset_index()
-    estimated_created_date_df = estimated_created_date_df.rename(columns={'index': 'user_id', 'user_created_date': 'estimated_created_date'})
-    main_df = main_df.merge(estimated_created_date_df, how='left', on='user_id')
-    return main_df
 
-def create_user_profile():
-    main_df = clean_data_types(create_smaller_main_df())
-    main_df= get_estimated_created_date(main_df)
-    main_df= get_days_active(main_df)
-    main_df= get_days_inactive(main_df)
-    counts_df = get_counts(main_df)
+
+def clean_user_profile(counts_df):
     missing_counts = main_df[['user_id', 'estimated_created_date', 'days_active', 'days_inactive']]
     missing_counts = missing_counts.groupby(['user_id'])['estimated_created_date', 'days_active', 'days_inactive'].min()
     missing_counts = missing_counts.reset_index()
@@ -199,4 +216,4 @@ def df_to_csv(df, path):
     df.to_csv(path, ",")
 
 if __name__ = "__main__":
-    df_to_csv(create_user_profile(), 'user_profile.csv')
+    create_user_profile()
