@@ -5,6 +5,7 @@ file creates the csv for the user_profile_df. Should only be run once for each d
 import pandas as pd
 from sklearn.pipeline import make_pipeline
 import trackwell_pipelines as pipe
+import read_from_db as ReadFromDB
 
 psql_user = os.environ.get('PSQL_USER')
 psql_password = os.environ.get('PSQL_PASSWORD')
@@ -12,18 +13,17 @@ psql_db_name = os.environ.get('PSQL_TRACKWELL')
 
 
 def create_user_profile():
-    main_df = merge_user_entry_tables()
-
+    user_df = read_single_table('user_table')
+    entry_df = read_single_table('entry_df')
     '''currently at sudo-code level, changing full feature engineering section into pipelines'''
-    pipeline{
-        FeatureUnion{'MergeOnUserID'
+    user_df_pipeline = Pipeline([('CreateUserEntryDF', CreateUserEntryDF())])
+    user_df, entry_df, user_entry_df = user_df_pipeline.fit().transform(user_df, entry_df)
+    pipeline->
+        FeatureUnion->'MergeOnUserID'
             #pipeline {DropEmptyColumns(everything but 'user_created_date')},
             pipeline {GroupByUserIDMin(), ToDateDropTime(just 'entry_chosen_datetime' & 'user_created_date'), CreateEstimatedUserCreatedDate()}
-            }
         pipline {GroupByUserIDMax(), CreateMaxDaysActive(), CreateDaysSinceActive()
 
-        }
-            }
 
     #main_df = entry_dt_update_type(main_df)
     #main_df = get_estimated_created_date(main_df)
@@ -33,39 +33,42 @@ def create_user_profile():
     user_profile = clean_user_profile(counts_df)
     df_to_csv(user_profile, 'user_profile.csv')
 
+def read_single_table(table):
+    db_conn = ReadFromDB(f'{psql_user}:{psql_password}@{psql_db_name}')
+    all_rows_per_table_query = f'SELECT * FROM {table};'
+    return db_conn.query_for_df(all_rows_per_table_query)
 
-def merge_user_entry_tables():
-    '''
-    Input: none
-    Return: main_df with the user_table and entry table merged together
-    '''
-    #read in the tables as seperate dataframes
-    table_dataframes = []
-    tables = ["user_table", "entry"]
-    for table in tables:
-        all_rows_per_table_query = f'SELECT * FROM {table};'
-        table_dataframes.append(query_to_dataframe(all_rows_per_table_query))
-    #drop columns with all na
-    #table_dataframes[0] = drop_empty_columns(table_dataframes[0])
-    #table_dataframes[1] = drop_empty_columns(table_dataframes[1])
-    #change column names for user_table
-    for column in table_dataframes[0].columns:
-        if column == '_id':
-            table_dataframes[0].rename(index=str, columns={column: "user_id"}, inplace=True)
-        else:
-            table_dataframes[0].rename(index=str, columns={column: f"user_{column}"}, inplace=True)
-    #change column names for entry table
-    for column in table_dataframes[1].columns:
-        if column == 'chosen_user':
-            table_dataframes[1].rename(index=str, columns={column: "user_id"}, inplace=True)
-        elif column == '_id':
-            table_dataframes[1].rename(index=str, columns={column: "entry_id"}, inplace=True)
-        elif column == 'preset_array':
-            table_dataframes[1].rename(index=str, columns={column: "preset_array_id"}, inplace=True)
-        else:
-            table_dataframes[1].rename(index=str, columns={column: f"entry_{column}"}, inplace=True)
-    #return the two dataframes merged together on user_id
-    return table_dataframes[0].merge(table_dataframes[1],how='left',on = 'user_id')
+# def merge_user_entry_tables():
+#     '''
+#     Input: none
+#     Return: main_df with the user_table and entry table merged together
+#     '''
+#     #read in the tables as seperate dataframes
+#     table_dataframes = []
+#     tables = ["user_table", "entry"]
+#     for table in tables:
+#         table_dataframes.append(read_single_table(table))
+#     #drop columns with all na
+#     #table_dataframes[0] = drop_empty_columns(table_dataframes[0])
+#     #table_dataframes[1] = drop_empty_columns(table_dataframes[1])
+#     #change column names for user_table
+#     for column in table_dataframes[0].columns:
+#         if column == '_id':
+#             table_dataframes[0].rename(index=str, columns={column: "user_id"}, inplace=True)
+#         else:
+#             table_dataframes[0].rename(index=str, columns={column: f"user_{column}"}, inplace=True)
+#     #change column names for entry table
+#     for column in table_dataframes[1].columns:
+#         if column == 'chosen_user':
+#             table_dataframes[1].rename(index=str, columns={column: "user_id"}, inplace=True)
+#         elif column == '_id':
+#             table_dataframes[1].rename(index=str, columns={column: "entry_id"}, inplace=True)
+#         elif column == 'preset_array':
+#             table_dataframes[1].rename(index=str, columns={column: "preset_array_id"}, inplace=True)
+#         else:
+#             table_dataframes[1].rename(index=str, columns={column: f"entry_{column}"}, inplace=True)
+#     #return the two dataframes merged together on user_id
+#     return table_dataframes[0].merge(table_dataframes[1],how='left',on = 'user_id')
 
 # def drop_empty_columns(df):
 #     '''

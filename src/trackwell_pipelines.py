@@ -93,3 +93,37 @@ class CreateDaysSinceActive:
         columns['days_since_active'] = DATA_PULL_DATE - np.maximum(columns['entry_created_date'],columns['estimated_created_date'])
         columns['days_since_active'] = columns['days_since_active'].dt.days.astype(int)
         return columns
+
+class CreateUserEntryDF:
+    '''creates the user_entry df and returns all three data frames with matching column names'''
+    def __init__(self):
+        self
+
+    def fit(self, *args, **kwargs):
+        return self
+
+    def transform(self, user_df, entry_df, **transform_params):
+        table_dataframes = [user_df.copy(), entry_df.copy()]
+
+        for column in table_dataframes[0].columns:
+            if column == '_id':
+                table_dataframes[0].rename(index=str, columns={column: "user_id"}, inplace=True)
+                user_df.rename(index=str, columns={column: "user_id"}, inplace=True)
+            else:
+                table_dataframes[0].rename(index=str, columns={column: f"user_{column}"}, inplace=True)
+        #change column names for entry table
+        for column in table_dataframes[1].columns:
+            if column == 'chosen_user':
+                table_dataframes[1].rename(index=str, columns={column: "user_id"}, inplace=True)
+                entry_df.rename(index=str, columns={column: "user_id"}, inplace=True)
+            elif column == '_id':
+                table_dataframes[1].rename(index=str, columns={column: "entry_id"}, inplace=True)
+                entry_df.rename(index=str, columns={column: "entry_id"}, inplace=True)
+            elif column == 'preset_array':
+                table_dataframes[1].rename(index=str, columns={column: "preset_array_id"}, inplace=True)
+                entry_df.rename(index=str, columns={column: "preset_array_id"}, inplace=True)
+            else:
+                table_dataframes[1].rename(index=str, columns={column: f"entry_{column}"}, inplace=True)
+        #return the two dataframes merged together on user_id
+        user_entry_df = table_dataframes[0].merge(table_dataframes[1],how='left',on = 'user_id')
+        return user_df, entry_df, user_entry_df
