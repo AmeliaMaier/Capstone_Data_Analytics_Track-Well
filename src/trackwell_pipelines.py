@@ -1,4 +1,7 @@
 import pandas as pd
+import scipy.stats as stats
+import numpy as np
+
 
 DATA_PULL_DATE = pd.to_datetime('03/03/2018')
 
@@ -24,15 +27,15 @@ class DropListedColumns:
     def transform(self, df, column_names, **transform_params):
         return df.drop(column_names, axis=1)
 
-class MergeByUserID:
-    def __init__(self):
-        self
-
-    def fit(self, *args, **kwargs):
-        return self
-
-    def transform(self, columns, df, **transform_params):
-        return df.groupby('user_id').min()
+# class MergeByUserID:
+#     def __init__(self):
+#         self
+#
+#     def fit(self, *args, **kwargs):
+#         return self
+#
+#     def transform(self, columns, df, **transform_params):
+#         return df.groupby('user_id').min()
 
 class GroupByUserIDMin:
     def __init__(self):
@@ -44,7 +47,7 @@ class GroupByUserIDMin:
     def transform(self, df, **transform_params):
         return df.groupby('user_id').min()
 
-class GroupByUserIDMin:
+class GroupByUserIDMax:
     def __init__(self):
         self
 
