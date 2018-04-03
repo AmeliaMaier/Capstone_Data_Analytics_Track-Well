@@ -18,7 +18,15 @@ def create_user_profile():
     '''currently at sudo-code level, changing full feature engineering section into pipelines'''
     user_df_pipeline = Pipeline([('CreateUserEntryDF', CreateUserEntryDF())])
     user_df, entry_df, user_entry_df = user_df_pipeline.fit().transform(user_df, entry_df)
-    pipeline->
+    pipelineX-> DropEmptyColumns(user_df),
+                StringsTo1_0(user_df, 'bio_sex', ('Male','Female')),
+                AnsweredOrNot(user_df, ['dup_protocol_started', 'smoke_yn','alcohol_yn','married_yn','caffeine_yn', 'pregnant_yn','blood_type', 'bio_sex', 'menstruation_yn']),
+                OpenTextLength(df, ['usual_conditions', 'usual_medications', 'usual_diet', 'usual_activity']),
+                NAto0(user_df, ['smoke_yn','alcohol_yn','married_yn','caffeine_yn', 'pregnant_yn', 'bio_sex', 'menstruation_yn']),
+                CreateHeightLikelihood(user_df),
+                DropListedColumns(user_df, ['dup_protocol_active', 'dup_protocol_finished', 'modified_date', 'usual_conditions', 'anon_code', 'usual_medications', 'usual_diet', 'usual_activity', 'protocol_array_list', 'dup_protocol_started','blood_type', 'created_date', 'height_cm'])
+
+    pipelineY->
         FeatureUnion->'MergeOnUserID'
             #pipeline {DropEmptyColumns(everything but 'user_created_date')},
             pipeline {GroupByUserIDMin(), ToDateDropTime(just 'entry_chosen_datetime' & 'user_created_date'), CreateEstimatedUserCreatedDate()}
@@ -131,73 +139,73 @@ def clean_user_profile(counts_df):
     counts_df['user_activity_cnt'] = counts_df['entry_chosen_datetime_cnt']+counts_df['entry_id_cnt']
     counts_df['user_activity_score'] = counts_df['user_activity_cnt'].astype(float)/counts_df['days_active'].astype(float)
 
-    user_profile_df = query_to_dataframe('SELECT * FROM user_table;')
-    user_profile_df.rename(index=str, columns={'_id': "user_id"}, inplace=True)
+    # user_profile_df = query_to_dataframe('SELECT * FROM user_table;')
+    # user_profile_df.rename(index=str, columns={'_id': "user_id"}, inplace=True)
 
     user_profile_df = user_profile_df.merge(counts_df[['user_id','user_activity_score', 'user_activity_cnt', 'days_active', 'days_inactive', 'estimated_created_date']],how='left',on = 'user_id')
     user_profile_df['user_active_yn'] =  np.where(user_profile_df['user_activity_score']==0,0,1)
-    user_profile_df.dropna(axis=1,how='all', inplace=True)
-    user_profile_df['bio_sex'].replace(('Male','Female'), (1,0), inplace=True)
-    user_profile_df['dup_protocol_started'] = user_profile_df['dup_protocol_started'].fillna(0)
-    user_profile_df['dup_protocol_started'] =  np.where(user_profile_df['dup_protocol_started']==0,0,1)
-    user_profile_df['dup_protocol_active'] = user_profile_df['dup_protocol_active'].fillna(0)
-    user_profile_df['dup_protocol_active'] =  np.where(user_profile_df['dup_protocol_active']==0,0,1)
-    user_profile_df['dup_protocol_finished'] = user_profile_df['dup_protocol_finished'].fillna(0)
-    user_profile_df['dup_protocol_finished'] =  np.where(user_profile_df['dup_protocol_finished']==0,0,1)
-    user_profile_df.drop('modified_date', axis=1, inplace=True)
-    user_profile_df['usual_conditions_len'] = user_profile_df['usual_conditions'].str.len()
-    user_profile_df['usual_conditions_len'] =user_profile_df['usual_conditions_len'].fillna(0)
-    user_profile_df.drop('usual_conditions', axis=1, inplace=True)
-    user_profile_df.drop('anon_code', axis=1, inplace=True)
-    user_profile_df['usual_medications_len'] = user_profile_df['usual_medications'].str.len()
-    user_profile_df['usual_medications_len'] =user_profile_df['usual_medications_len'].fillna(0)
-    user_profile_df.drop('usual_medications', axis=1, inplace=True)
-    user_profile_df['usual_diet_len'] = user_profile_df['usual_diet'].str.len()
-    user_profile_df['usual_diet_len'] =user_profile_df['usual_diet_len'].fillna(0)
-    user_profile_df.drop('usual_diet', axis=1, inplace=True)
-    user_profile_df['usual_activity_len'] = user_profile_df['usual_activity'].str.len()
-    user_profile_df['usual_activity_len'] =user_profile_df['usual_activity_len'].fillna(0)
-    user_profile_df.drop('usual_activity', axis=1, inplace=True)
-    user_profile_df.drop('protocol_array_list', axis=1, inplace=True)
-    user_profile_df['smoke_answered'] = user_profile_df['smoke_yn']
-    user_profile_df['smoke_answered'] = user_profile_df['smoke_answered'].fillna(-1)
-    user_profile_df['smoke_answered'] = np.where(user_profile_df['smoke_answered']==-1, 0, 1)
-    user_profile_df['smoke_yn'] = user_profile_df['smoke_yn'].fillna(0)
+    # user_profile_df.dropna(axis=1,how='all', inplace=True)
+    # user_profile_df['bio_sex'].replace(('Male','Female'), (1,0), inplace=True)
+    # user_profile_df['dup_protocol_started'] = user_profile_df['dup_protocol_started'].fillna(0)
+    # user_profile_df['dup_protocol_started'] =  np.where(user_profile_df['dup_protocol_started']==0,0,1)
+    # # user_profile_df['dup_protocol_active'] = user_profile_df['dup_protocol_active'].fillna(0)
+    # user_profile_df['dup_protocol_active'] =  np.where(user_profile_df['dup_protocol_active']==0,0,1)
+    # user_profile_df['dup_protocol_finished'] = user_profile_df['dup_protocol_finished'].fillna(0)
+    # user_profile_df['dup_protocol_finished'] =  np.where(user_profile_df['dup_protocol_finished']==0,0,1)
+    # user_profile_df.drop('modified_date', axis=1, inplace=True)
+    # user_profile_df['usual_conditions_len'] = user_profile_df['usual_conditions'].str.len()
+    # user_profile_df['usual_conditions_len'] =user_profile_df['usual_conditions_len'].fillna(0)
+    # user_profile_df.drop('usual_conditions', axis=1, inplace=True)
+    # user_profile_df.drop('anon_code', axis=1, inplace=True)
+    # user_profile_df['usual_medications_len'] = user_profile_df['usual_medications'].str.len()
+    # user_profile_df['usual_medications_len'] =user_profile_df['usual_medications_len'].fillna(0)
+    # user_profile_df.drop('usual_medications', axis=1, inplace=True)
+    # user_profile_df['usual_diet_len'] = user_profile_df['usual_diet'].str.len()
+    # user_profile_df['usual_diet_len'] =user_profile_df['usual_diet_len'].fillna(0)
+    # user_profile_df.drop('usual_diet', axis=1, inplace=True)
+    # user_profile_df['usual_activity_len'] = user_profile_df['usual_activity'].str.len()
+    # user_profile_df['usual_activity_len'] =user_profile_df['usual_activity_len'].fillna(0)
+    # user_profile_df.drop('usual_activity', axis=1, inplace=True)
+    # user_profile_df.drop('protocol_array_list', axis=1, inplace=True)
+    # user_profile_df['smoke_answered'] = user_profile_df['smoke_yn']
+    # user_profile_df['smoke_answered'] = user_profile_df['smoke_answered'].fillna(-1)
+    # user_profile_df['smoke_answered'] = np.where(user_profile_df['smoke_answered']==-1, 0, 1)
+    # user_profile_df['smoke_yn'] = user_profile_df['smoke_yn'].fillna(0)
 
-    user_profile_df['alcohol_answered'] = user_profile_df['alcohol_yn']
-    user_profile_df['alcohol_answered'] = user_profile_df['alcohol_answered'].fillna(-1)
-    user_profile_df['alcohol_answered'] = np.where(user_profile_df['alcohol_answered']==-1, 0, 1)
-    user_profile_df['alcohol_yn'] = user_profile_df['alcohol_yn'].fillna(0)
+    # user_profile_df['alcohol_answered'] = user_profile_df['alcohol_yn']
+    # user_profile_df['alcohol_answered'] = user_profile_df['alcohol_answered'].fillna(-1)
+    # user_profile_df['alcohol_answered'] = np.where(user_profile_df['alcohol_answered']==-1, 0, 1)
+    # user_profile_df['alcohol_yn'] = user_profile_df['alcohol_yn'].fillna(0)
 
-    user_profile_df['married_answered'] = user_profile_df['married_yn']
-    user_profile_df['married_answered'] = user_profile_df['married_answered'].fillna(-1)
-    user_profile_df['married_answered'] = np.where(user_profile_df['married_answered']==-1, 0, 1)
-    user_profile_df['married_yn'] = user_profile_df['married_yn'].fillna(0)
-    user_profile_df['caffeine_answered'] = user_profile_df['caffeine_yn']
-    user_profile_df['caffeine_answered'] = user_profile_df['caffeine_answered'].fillna(-1)
-    user_profile_df['caffeine_answered'] = np.where(user_profile_df['caffeine_answered']==-1, 0, 1)
-    user_profile_df['caffeine_yn'] = user_profile_df['caffeine_yn'].fillna(0)
-    user_profile_df['pregnant_answered'] = user_profile_df['pregnant_yn']
-    user_profile_df['pregnant_answered'] = user_profile_df['pregnant_answered'].fillna(-1)
-    user_profile_df['pregnant_answered'] = np.where(user_profile_df['pregnant_answered']==-1, 0, 1)
-    user_profile_df['pregnant_yn'] = user_profile_df['pregnant_yn'].fillna(0)
-    user_profile_df['blood_type_answered'] = user_profile_df['blood_type']
-    user_profile_df['blood_type_answered'] = user_profile_df['blood_type_answered'].fillna(-1)
-    user_profile_df['blood_type_answered'] = np.where(user_profile_df['blood_type_answered']==-1, 0, 1)
-    user_profile_df.drop('blood_type', axis=1, inplace=True)
+    # user_profile_df['married_answered'] = user_profile_df['married_yn']
+    # user_profile_df['married_answered'] = user_profile_df['married_answered'].fillna(-1)
+    # user_profile_df['married_answered'] = np.where(user_profile_df['married_answered']==-1, 0, 1)
+    # user_profile_df['married_yn'] = user_profile_df['married_yn'].fillna(0)
+    # user_profile_df['caffeine_answered'] = user_profile_df['caffeine_yn']
+    # user_profile_df['caffeine_answered'] = user_profile_df['caffeine_answered'].fillna(-1)
+    # user_profile_df['caffeine_answered'] = np.where(user_profile_df['caffeine_answered']==-1, 0, 1)
+    # user_profile_df['caffeine_yn'] = user_profile_df['caffeine_yn'].fillna(0)
+    # user_profile_df['pregnant_answered'] = user_profile_df['pregnant_yn']
+    # user_profile_df['pregnant_answered'] = user_profile_df['pregnant_answered'].fillna(-1)
+    # user_profile_df['pregnant_answered'] = np.where(user_profile_df['pregnant_answered']==-1, 0, 1)
+    # user_profile_df['pregnant_yn'] = user_profile_df['pregnant_yn'].fillna(0)
+    # user_profile_df['blood_type_answered'] = user_profile_df['blood_type']
+    # user_profile_df['blood_type_answered'] = user_profile_df['blood_type_answered'].fillna(-1)
+    # user_profile_df['blood_type_answered'] = np.where(user_profile_df['blood_type_answered']==-1, 0, 1)
+    # user_profile_df.drop('blood_type', axis=1, inplace=True)
 
-    user_profile_df['bio_sex_answered'] = user_profile_df['bio_sex']
-    user_profile_df['bio_sex_answered'] = user_profile_df['bio_sex_answered'].fillna(-1)
-    user_profile_df['bio_sex_answered'] = np.where(user_profile_df['bio_sex_answered']==-1, 0, 1)
-    user_profile_df['bio_sex'] = user_profile_df['bio_sex'].fillna(0)
+    # user_profile_df['bio_sex_answered'] = user_profile_df['bio_sex']
+    # user_profile_df['bio_sex_answered'] = user_profile_df['bio_sex_answered'].fillna(-1)
+    # user_profile_df['bio_sex_answered'] = np.where(user_profile_df['bio_sex_answered']==-1, 0, 1)
+    # user_profile_df['bio_sex'] = user_profile_df['bio_sex'].fillna(0)
 
-    user_profile_df['menstruation_answered'] = user_profile_df['menstruation_yn']
-    user_profile_df['menstruation_answered'] = user_profile_df['menstruation_answered'].fillna(-1)
-    user_profile_df['menstruation_answered'] = np.where(user_profile_df['menstruation_answered']==-1, 0, 1)
-    user_profile_df['menstruation_yn'] = user_profile_df['menstruation_yn'].fillna(0)
+    # user_profile_df['menstruation_answered'] = user_profile_df['menstruation_yn']
+    # user_profile_df['menstruation_answered'] = user_profile_df['menstruation_answered'].fillna(-1)
+    # user_profile_df['menstruation_answered'] = np.where(user_profile_df['menstruation_answered']==-1, 0, 1)
+    # user_profile_df['menstruation_yn'] = user_profile_df['menstruation_yn'].fillna(0)
 
-    '''user_profile_df=add_months(user_profile_df)'''
-    user_profile_df.drop('created_date', axis=1, inplace=True)
+    # '''user_profile_df=add_months(user_profile_df)'''
+    # user_profile_df.drop('created_date', axis=1, inplace=True)
 
     #so as to not have to pull sensus data, useing http://www.usablestats.com/lessons/normal for average heights and distributions
     #adult male heights are on average 70 inches  (5'10) with a standard deviation of 4 inches. Adult women are on average a bit shorter and less variable in height with a mean height of 65  inches (5'5) and standard deviation of 3.5 inches
@@ -207,12 +215,12 @@ def clean_user_profile(counts_df):
     # female_sd_height = 8.89
     #male_norm = stats.norm(male_average_height,male_sd_height)
     #female_norm = stats.norm(female_average_height,female_sd_height)
-    adult_avg_height = 177+165/2
-    adult_sd_height = 20
-    adult_norm = stats.norm(adult_avg_height, adult_sd_height)
-    user_profile_df['height_cm'] = user_profile_df['height_cm'].fillna(0)
-    user_profile_df['height_likelihood'] = user_profile_df['height_cm'].apply(lambda x: adult_norm.pdf(x))
-    user_profile_df.drop('height_cm', axis=1, inplace=True)
+    # adult_avg_height = 177+165/2
+    # adult_sd_height = 20
+    # adult_norm = stats.norm(adult_avg_height, adult_sd_height)
+    # user_profile_df['height_cm'] = user_profile_df['height_cm'].fillna(0)
+    # user_profile_df['height_likelihood'] = user_profile_df['height_cm'].apply(lambda x: adult_norm.pdf(x))
+    # user_profile_df.drop('height_cm', axis=1, inplace=True)
     return user_profile_df
 
 def df_to_csv(df, path):

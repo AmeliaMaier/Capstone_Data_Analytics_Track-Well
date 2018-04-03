@@ -5,6 +5,8 @@ The primary unit test file for my trackwell capstone.
 import time
 import unittest
 from src.read_from_db import ReadFromDB
+from src import trackwell_pipelines as pipe
+from src import create_user_profile as profile
 import pandas as pd
 import os
 
@@ -13,7 +15,7 @@ psql_user = os.environ.get('PSQL_USER')
 psql_password = os.environ.get('PSQL_PASSWORD')
 psql_db_name = os.environ.get('PSQL_TEST')
 
-class TestTrackwell(unittest.TestCase):
+class TestReadFromDB(unittest.TestCase):
     def setUp(self):
         self._started_at = time.time()
 
@@ -28,3 +30,21 @@ class TestTrackwell(unittest.TestCase):
         df_expected = pd.DataFrame(data = {'_id': ['1', '2', '3']})
         self.assertEqual(df_expected.columns, df_test.columns)
         self.assertEqual(df_expected['_id'][1], df_test['_id'][1])
+
+class TestTrackwellPipelines(unittest.TestCase):
+    def setUp(self):
+        self._started_at = time.time()
+
+    def tearDown(self):
+        elapsed = time.time() - self._started_at
+        if elapsed > SLOW_TEST_THRESHOLD:
+            print(f'{self.id()}: {round(elapsed,2)}s')
+
+class TestCreateUserProfile(unittest.TestCase):
+    def setUp(self):
+        self._started_at = time.time()
+
+    def tearDown(self):
+        elapsed = time.time() - self._started_at
+        if elapsed > SLOW_TEST_THRESHOLD:
+            print(f'{self.id()}: {round(elapsed,2)}s')
