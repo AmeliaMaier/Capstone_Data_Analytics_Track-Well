@@ -75,7 +75,13 @@ class TestTrackwellPipelines(unittest.TestCase):
         self.assertEqual(df_expected['miney'][1], df_test['miney'][1])
 
     def test_to_date_drop_time(self):
-        self.assertEqual(1,1)
+        df_dates = pd.DataFrame(data = [[pd.to_datetime('2017-11-30 15:16:45.433502912')],[pd.to_datetime('2018-01-02 16:24:13.433502912')]], columns=['dates'], dtype=object)
+        df_expected = pd.DataFrame(data = [[pd.to_datetime('2017-11-30 15:16:45.433502912')],[pd.to_datetime('2018-01-02 16:24:13.433502912')]], columns=['dates'])
+        df_expected = df_expected['dates']
+        df_test = pipe.ToDateDropTime().fit().transform(df_dates['dates'])
+        self.assertEqual(df_expected.shape, df_test.shape)
+        self.assertEqual(tuple(df_expected.columns), tuple(df_test.columns))
+        self.assertEqual(df_expected['date'][1], df_test['date'][1])
 
     def test_na_to_0(self):
         self.assertEqual(1,1)
