@@ -65,9 +65,11 @@ class ToDateDropTime:
     def fit(self, *args, **kwargs):
         return self
 
-    def transform(self, columns, **transform_params):
-        columns = columns.dt.date
-        return pd.to_datetime(columns)
+    def transform(self,df , column_names, **transform_params):
+        for column in column_names:
+            df[column] = df[column].dt.date
+            df[column] = pd.to_datetime(df[column])
+        return df
 
 class NAto0:
     '''takes one or more date time column and fills NA with zero'''
@@ -90,13 +92,15 @@ class StringsTo1_0:
     def fit(self, *args, **kwargs):
         return self
 
-    def transform(self, df, column_name, string_tuple, **transform_params):
+    def transform(self, df, column_names, string_tuple, **transform_params):
         '''
             Input: df - the dataframe being worked with
-            column_name: the string column name for the column to be changed
+            column_names: list of string column names for the columns to be changed
             string_tuple: the two strings to be replaced with ints
         '''
-        return df[column_name].replace((string_tuple[0],string_tuple[1]), (0,1))
+        for column in column_names:
+            df[column] = df[column].replace((string_tuple[0],string_tuple[1]), (0,1))
+        return df
 
 class AnsweredOrNot:
     '''takes a list of columns and changes all missing values to 0 and all filled values to 1'''
@@ -110,7 +114,7 @@ class AnsweredOrNot:
         for column_name in column_names:
             df[f'{column_name}_answered'] = df[column_name]
             df[f'{column_name}_answered'] = df[f'{column_name}_answered'].fillna(-1)
-            df[f'{column_name}_answered'] =  np.where(user_profile_df[f'{column_name}_answered']==-1,0,1)
+            df[f'{column_name}_answered'] =  np.where(df[f'{column_name}_answered']==-1,0,1)
         return df
 
 class CreateHeightLikelihood:
@@ -127,12 +131,12 @@ class CreateHeightLikelihood:
     def fit(self, *args, **kwargs):
         return self
 
-    def transform(self, df, **transform_params):
+    def transform(self, df, column_name, **transform_params):
         adult_avg_height = 177+165/2
         adult_sd_height = 20
-        adult_norm = stats.norm(adult_avg_height, adult_sd_height)
-        df['height_cm'] = df['height_cm'].fillna(0)
-        df['height_likelihood'] = df['height_cm'].apply(lambda x: adult_norm.pdf(x))
+        adult_norm = stats.norm(loc=adult_avg_height, scale=adult_sd_height)
+        df[column_name] = df[column_name].fillna(0)
+        df['height_likelihood'] = df[column_name].apply(lambda x: adult_norm.pdf(x))
         return df
 
 class OpenTextLength:
@@ -157,8 +161,9 @@ class CreateEstimatedUserCreatedDate:
     def fit(self, *args, **kwargs):
         return self
 
-    def transform(self, columns, **transform_params):
-        return np.argmin(columns, axis=0)
+    def transform(self,df, column_names, **transform_params):
+        df['estimated_user_created_date'] = df[column_names].min(axis=1)
+        return df['estimated_user_created_date']
 
 class CreateMaxDaysActive:
     '''creates the max days active based on the estimated created date and the most recent entry_created_day. Lowest value allowed is 1.'''
@@ -168,12 +173,13 @@ class CreateMaxDaysActive:
     def fit(self, *args, **kwargs):
         return self
 
-    def transform(self, columns, **transform_params):
-        columns['max_active_days'] = columns['entry_created_date'] - columns['estimated_created_date']
-        columns['max_active_days'] = columns['max_active_days'].fillna(1)
-        columns['max_active_days'] = columns['max_active_days'].dt.ceil('1D')
-        columns['max_active_days'] = columns['max_active_days'].dt.days.astype(int)
-        return columns
+    def transform(self,df, column_names, **transform_params):
+        df['max_active_days'] = df[column_names[0]] - df[column_names[1]]
+        df['max_active_days'] = df['max_active_days'].fillna(1)
+        df['max_active_days'] = df['max_active_days'].dt.ceil('1D')
+        df['max_active_days'] = df['max_active_days'].dt.days.astype(int)
+        df['max_active_days'] = df['max_active_days'].replace({0:1})
+        return df
 
 class CreateDaysSinceActive:
     '''creates the days since active based on the last day they logged data compared to the date the data was pulled. Lowest value allowed is 0.'''
@@ -183,10 +189,10 @@ class CreateDaysSinceActive:
     def fit(self, *args, **kwargs):
         return self
 
-    def transform(self, columns, **transform_params):
-        columns['days_since_active'] = DATA_PULL_DATE - np.maximum(columns['entry_created_date'],columns['estimated_created_date'])
-        columns['days_since_active'] = columns['days_since_active'].dt.days.astype(int)
-        return columns
+    def transform(self,df, column_names, **transform_params):
+        df['days_since_active'] = DATA_PULL_DATE - df[column_names].max(axis=1)
+        df['days_since_active'] = df['days_since_active'].dt.days.astype(int)
+        return df
 
 class CreateUserEntryDF:
     '''creates the user_entry df and returns all three data frames with matching column names'''
@@ -221,3 +227,11 @@ class CreateUserEntryDF:
         #return the two dataframes merged together on user_id
         user_entry_df = table_dataframes[0].merge(table_dataframes[1],how='left',on = 'user_id')
         return user_df, entry_df, user_entry_df
+
+class SelectColumns:
+    def _init_(self):
+        return self
+    def fit(self, *args, **kwargs):
+        return self
+    def transform(self, df, column_names, **transform_params):
+        return df[column_names]
